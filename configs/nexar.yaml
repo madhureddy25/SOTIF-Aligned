@@ -1,0 +1,10 @@
+# Preset for Nexar collision / near-miss mining.
+# Nexar labels KINEMATIC hazards (collisions, near-misses), not perception failures, so the
+# kinematic signal (ego-path looming, driver-reaction ego-motion, track births) leads and the
+# perception-failure signals (uncertainty, optical) are down-weighted. Do NOT use these weights
+# to judge perception-failure mining; that needs CARLA counterfactuals or hand-checked clips.
+mining:
+  weights: {uncertainty: 0.3, continuity: 1.0, optical_density: 0.3, rarity: 0.5}
+  feature_weights:
+    c.looming_rate: 0.3      # whole-frame looming: AUC 0.51 on Nexar v3 (noise); ego-path version replaces it
+    o.saturation: 0.5        # AUC 0.66 but likely a day/scene confound between positives and negatives

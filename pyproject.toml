@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sotif-miner"
+version = "0.1.0"
+description = "SOTIF-aligned causal dashcam edge-case miner and remediation agent"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "scikit-learn>=1.3",        # NearestNeighbors, HDBSCAN (>=1.3)
+  "opencv-python-headless>=4.8",
+  "pydantic>=2.5",
+  "pyyaml>=6",
+  "typer>=0.12",
+]
+
+[project.optional-dependencies]
+detect = ["rfdetr>=1.3", "torch>=2.2", "supervision>=0.25"]
+trackers = ["trackers>=2.0"]
+vllm = ["openai>=1.40"]
+ollama = ["httpx>=0.27"]
+claude = ["anthropic>=0.70"]
+embed = ["transformers>=4.45", "torch>=2.2", "sentence-transformers>=3.0"]
+cluster = ["umap-learn>=0.5"]
+viz = ["fiftyone>=1.0"]
+mcap = ["mcap-ros2-support>=0.5"]
+eval = ["pycocotools>=2.0.7"]
+dev = ["pytest>=8", "ruff>=0.5", "openai>=1.40", "httpx>=0.27", "anthropic>=0.70", "pycocotools>=2.0.7"]
+all = ["sotif-miner[detect,trackers,vllm,ollama,claude,embed,cluster,eval]"]
+
+[project.scripts]
+sotif-miner = "sotif_miner.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+sotif_miner = ["vlm/prompts/*.md", "configs/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "gpu: requires a CUDA GPU and real model weights",
+  "network: downloads weights or calls a remote endpoint",
+]
+addopts = "-m 'not gpu and not network'"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501", "B008"]

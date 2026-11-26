@@ -1,0 +1,75 @@
+# Default pipeline configuration. Override with: sotif-miner <cmd> --config my.yaml
+detector:
+  backend: rfdetr          # rfdetr | scripted
+  size: medium             # nano | small | medium | large
+  segmentation: false
+  threshold: 0.25          # keep low: Stage 1 needs the 0.25-0.60 uncertainty band
+tracker:
+  backend: cmc_sort        # cmc_sort | bytetrack | ocsort  (latter two need `trackers` extra)
+  high_thresh: 0.6
+  low_thresh: 0.25
+  match_iou: 0.3
+  lost_buffer: 30          # frames
+  min_hits: 2
+  motion_compensation: true
+mining:
+  step_s: 0.5
+  weights: {uncertainty: 1.0, continuity: 1.0, optical_density: 0.8, rarity: 0.7}
+  t_on: 0.55
+  t_off: 0.35
+  # Surprise scoring: each feature vs. the clip's own previous baseline_s seconds (robust z-score)
+  baseline_s: 10.0
+  baseline_gap_s: 0.5      # skip the most recent 0.5 s so a ramping event does not mask itself
+  warmup_s: 2.0            # no score until this much video has been seen
+  z_low: 2.5               # z at which a feature starts to count
+  z_high: 6.0              # z at which it saturates to 1
+  looming_abs: 1.2         # absolute trigger: relative box-area growth per second (~TTC < 1.7 s)
+  pre_s: 2.0
+  post_s: 2.0
+  min_window_s: 4.0
+  max_window_s: 8.0
+  uncertainty_band: [0.25, 0.60]
+  dense_tracks: 20
+  dark_luminance: 0.18
+  glare_saturation: 0.08
+  blur_sharpness: 0.15
+  looming_rate: 0.8        # relative area growth per second that saturates the signal
+  rarity_k: 5
+evidence:
+  keyframe_fps_dense: 5
+  keyframe_fps_sparse: 1
+  max_frames: 6
+  max_rois: 3
+  roi_pad: 0.35
+  roi_upscale_min: 384
+  frame_max_side: 768
+diagnosis:
+  optical_stress_high: 0.5
+  max_repairs: 1
+  crop_hit_score: 0.5      # detector score on the enhanced crop that counts as "recovered"
+  # "unstable" focus track = a real perception failure, not normal confidence jitter
+  presence_unstable: 0.8   # matched in < 80% of the frames of its own lifespan in the window
+  dropouts_unstable: 3     # lost and re-matched >= 3 times in the window (flicker)
+  gap_unstable: 2          # a gap of >= 2 frames
+  low_conf_frac_unstable: 0.3  # >= 30% of its observations below 0.4 confidence
+  crop_match_iou: 0.3      # a crop detection counts only if it overlaps the focus actor this much
+  card_frames: 4           # frames sent with the trigger-card prompt (nearest the peak)
+  card_rois: 2             # zoomed crops sent with the trigger-card prompt
+  ego_looming_hazard: 0.8  # relative area growth / s (weak looming; supporting only)
+  ego_looming_strong: 1.0  # strong looming that alone signals a closing conflict
+  ttc_hazard_s: 2.0        # min time-to-collision proxy that counts as an imminent conflict
+  max_windows_per_clip: 2  # diagnose the top-N windows per clip by peak score
+taxonomy:
+  min_cluster_size: 3
+  umap_components: 8
+  novelty_distance: 0.35   # cosine distance above which an event is Area 3 (unknown)
+remediation:
+  corner_to_core: 0.333    # 1 corner : 3 core
+  lookalikes_per_cluster: 50
+  forgetting_epsilon_ap: 0.5
+vlm:
+  backend: ollama          # ollama (local GPU) | vllm (OpenAI-compatible server)
+  ollama: {base_url: "http://localhost:11434", model: "qwen3-vl:4b-instruct", num_ctx: 8192, timeout_s: 600}
+  vllm: {base_url: "http://localhost:8000/v1", model: "Qwen/Qwen3-VL-8B-Instruct", disable_thinking: true}
+  max_tokens: 2048
+  image_max_side: 768      # long side of every image sent to the VLM

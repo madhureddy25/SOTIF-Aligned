@@ -1,0 +1,71 @@
+# Unified driving ontology. Each dataset's class names map onto these.
+classes: [pedestrian, rider, bicycle, motorcycle, car, truck, bus, autorickshaw, animal, traffic_sign, traffic_light, debris, other]
+vru: [pedestrian, rider, bicycle, motorcycle, animal]
+maps:
+  coco:
+    person: pedestrian
+    bicycle: bicycle
+    motorcycle: motorcycle
+    car: car
+    truck: truck
+    bus: bus
+    train: other
+    traffic light: traffic_light
+    stop sign: traffic_sign
+    dog: animal
+    cat: animal
+    horse: animal
+    cow: animal
+    sheep: animal
+    bird: animal
+    elephant: animal
+  bdd100k:
+    pedestrian: pedestrian
+    rider: rider
+    car: car
+    truck: truck
+    bus: bus
+    train: other
+    motorcycle: motorcycle
+    bicycle: bicycle
+    traffic light: traffic_light
+    traffic sign: traffic_sign
+    other person: pedestrian
+    other vehicle: other
+    trailer: truck
+  cityscapes:   # ACDC uses Cityscapes ids
+    person: pedestrian
+    rider: rider
+    car: car
+    truck: truck
+    bus: bus
+    train: other
+    motorcycle: motorcycle
+    bicycle: bicycle
+  idd:
+    person: pedestrian
+    rider: rider
+    motorcycle: motorcycle
+    bicycle: bicycle
+    autorickshaw: autorickshaw
+    car: car
+    truck: truck
+    bus: bus
+    caravan: other
+    trailer: truck
+    train: other
+    vehicle fallback: other
+    animal: animal
+  coda:   # CODA corner-case categories collapse to the nearest unified class
+    pedestrian: pedestrian
+    cyclist: rider
+    car: car
+    truck: truck
+    bus: bus
+    tricycle: autorickshaw
+    dog: animal
+    animal: animal
+    traffic_cone: debris
+    barrier: debris
+    misc: debris
+    debris: debris

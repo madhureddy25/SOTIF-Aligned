@@ -1,0 +1,20 @@
+# Euro NCAP 2026-oriented tags the VLM may assign (it must choose from this list).
+euro_ncap_2026_tags:
+  - AEB_car_to_car
+  - AEB_pedestrian
+  - AEB_cyclist
+  - AEB_powered_two_wheeler
+  - cyclist_dooring
+  - low_speed_pedal_misapplication
+  - speed_limit_recognition
+  - lane_support
+  - head_on_crossing
+  - none
+# Known triggering-condition / insufficiency pairs (SOTIF Area 2 seed).
+# Events that match neither these nor an existing failure cluster are Area 3.
+known_triggers:
+  - {triggering_condition: low_light, functional_insufficiency: missed_detection}
+  - {triggering_condition: glare, functional_insufficiency: missed_detection}
+  - {triggering_condition: rain, functional_insufficiency: confidence_flicker}
+  - {triggering_condition: fog, functional_insufficiency: missed_detection}
+  - {triggering_condition: occluding_object, functional_insufficiency: track_loss_under_occlusion}
