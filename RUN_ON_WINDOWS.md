@@ -151,6 +151,19 @@ sotif-miner nexar-eval --run runs\nexar_big_heldout --root D:\data\nexar --split
 ```
 Do this BEFORE retraining train-stage1 on nexar_v4: a model retrained on these clips can no longer be tested on them.
 
+## Retrain Stage 1 on all mined clips (after the large held-out test)
+Back up the 200-clip model first (training overwrites it), retrain (minutes), then test on the 200
+clips that were never used for training (`runs\nexar_heldout`, clips 100–199 per label):
+```
+mkdir runs\baseline_200
+copy runs\nexar_v4\stage1_model.joblib runs\baseline_200\
+copy runs\nexar_v4\stage1_cv_metrics.json runs\baseline_200\
+sotif-miner train-stage1 --run runs\nexar_v4 --root D:\data\nexar
+sotif-miner rescore --run runs\nexar_heldout --model runs\nexar_v4\stage1_model.joblib
+sotif-miner nexar-eval --run runs\nexar_heldout --root D:\data\nexar --split train --bootstrap 2000 --metrics-kind held_out --out-metrics runs\heldout_1300_ci.json
+```
+Do not evaluate the retrained model on `runs\nexar_big_heldout`: it has now trained on those clips.
+
 ## Phase 4 — closed loop (fine-tune the detector on mined failures, prove it helps)
 Label-free (runs with what you have). The honest proof is re-mining held-out clips, not pseudo-label AP.
 ```

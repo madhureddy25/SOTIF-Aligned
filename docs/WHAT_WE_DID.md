@@ -34,6 +34,8 @@ self-contained HTML report. Five decoupled stages:
 
 - Mined **200 clips**, diagnosed **141 events** → **99.8 % valid JSON** from the local 4B model, 1 failure in 416 calls.
 - Built a **21-mode failure taxonomy**, 100 events in recurring (Area 2) modes, 13 novel (Area 3).
+- Retrained Stage 1 on **1,300 clips**: 5-fold CV recall 0.91 [0.89, 0.93], early recall 0.72 [0.68, 0.75];
+  on the 200 untouched held-out clips recall 0.91 [0.85, 0.96], median lead 4.2 s — but AUC unchanged (see #6).
 - Mined the **full Nexar train split: all 1,500 clips** (200 to train Stage 1; 200 + 1,100 held out), ~46 s per clip on the 3050.
 - **Held-out mining recall 0.88** (95 % CI 0.86–0.91) on **1,100 clips** the model never saw (trained on
   200). 5-fold CV on the training clips predicted 0.90 [0.84, 0.95] recall and 0.67 [0.58, 0.76] early
@@ -72,6 +74,14 @@ This is the part that makes the results credible — we did not paper over anyth
    keep the 100-clip result only as history. It also surfaced that 93 % of normal clips get ≥1 window:
    the miner localizes events within a clip rather than classifying clips, now stated in the limitations.
 
+6. **More data did not make the model better — and we say so.** Retraining Stage 1 on all 1,300 clips
+   (6.5× more) left step-level AUC unchanged (0.855 → 0.851). On the same 200 held-out clips, recall stayed
+   0.91, warnings came earlier (median lead 3.3 → 4.2 s), but false windows rose (3.1 → 3.4/min) and
+   compression fell (0.67 → 0.63). → The model is **feature-limited, not data-limited**; the next
+   improvement has to come from better signals. The threshold sweep also exposed a window-slicer quirk
+   (recall *drops* at very low thresholds because long active stretches are clamped to one 8 s window
+   around a single peak) — documented as a limitation, not hidden.
+
 Each fix is a separate commit with the evidence in its message.
 
 ---
@@ -89,8 +99,8 @@ Each fix is a separate commit with the evidence in its message.
 
 - **Phase 4 run:** the closed-loop machinery is built and tested, but a real *detection-accuracy* gain
   needs box labels Nexar lacks (CODA or BDD). The label-free path runs today and proves the mechanics.
-- **Scale:** all 1,500 train clips are mined, but the Stage-1 model is still trained on 200; retraining
-  on more clips (aimed at the clip-level false alarms) is the next step.
+- **Better Stage-1 signals:** scaling data 200 → 1,300 clips did not raise AUC, so fewer false alarms
+  need new features (e.g. ego-path looming), plus splitting long active stretches in the window slicer.
 - **Real-time / on-vehicle:** out of scope; this is an offline analysis and triage tool.
 - **Perception-failure causes** aren't independently validated (needs CARLA counterfactuals or human review).
 
