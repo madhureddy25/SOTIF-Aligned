@@ -54,7 +54,8 @@ We retrained Stage 1 on all 1,300 mined clips and re-tested on the **same 200 he
 (AUC) unchanged; the retrained model sits at a different point on the *same* trade-off curve — earlier
 warnings, slightly more false windows. The next gain must come from better signals, not more clips.
 Cross-validation over all 1,300 clips agrees: recall 0.91 [0.89, 0.93], early recall 0.72 [0.68, 0.75],
-3.2 false windows/min, 63% of video discarded.
+3.2 false windows/min, 63% of video discarded. Fixing two Stage-1 bugs (below) also left AUC at 0.850 —
+three independent changes, one ceiling.
 
 ---
 
@@ -138,9 +139,9 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
 - **Localizer, not a clip classifier:** 93% of normal-driving clips still get at least one window. The
   value is in narrowing each clip to a few seconds (65% of video discarded, ~3 false windows/min), not in
   declaring whole clips safe.
-- **Window slicer at low thresholds:** recall is not monotone in the threshold (0.94 at 0.4 but 0.79 at
-  0.05), because a long active stretch is clamped to one 8 s window around its single peak, which can miss
-  the event. Operating thresholds (0.4–0.6) are unaffected; splitting long stretches is a planned fix.
+- **High-recall mode:** the default threshold targets recall ≥ 0.9 with the most video discarded. For
+  "miss nothing" triage, threshold 0.2 reaches **0.98 recall (0.88 before the alert)** while still
+  discarding 38% of video (5-fold CV, 1,300 clips).
 
 ---
 

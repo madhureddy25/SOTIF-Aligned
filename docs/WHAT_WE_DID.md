@@ -82,6 +82,20 @@ This is the part that makes the results credible — we did not paper over anyth
    (recall *drops* at very low thresholds because long active stretches are clamped to one 8 s window
    around a single peak) — documented as a limitation, not hidden.
 
+7. **A feature that was silently always zero.** The per-feature AUC table showed `c.mid_terminations`
+   at exactly 0.000 on all 1,300 clips. Cause: the tracker reports a lost track ~3 s after it vanishes,
+   but the feature looked up its last box in a 2.5 s history — every lookup missed. → Vanishes are now
+   taken at the track's *last sighting* from the whole clip (also catching vanishes near the clip end).
+   The feature came alive (AUC 0.556) but is weak: the learned model's AUC stayed 0.850, and as a
+   hand-weighted rule it *hurt* the rule-based score (0.716 → 0.638), so the Nexar preset gives it rule
+   weight 0 while the learned model keeps it.
+
+8. **Recall fell at low thresholds.** The window slicer cut any long active stretch to one 8 s window around
+   its single peak, dropping events elsewhere in the stretch (recall 0.79 at threshold 0.05 vs 0.94 at
+   0.4). → Long stretches are now tiled into several windows. Recall is monotone again (0.99 at 0.05),
+   which opens a high-recall triage mode: **0.98 recall, 0.88 before the alert, 38% of video discarded**
+   at threshold 0.2. The default operating point is unchanged (0.92 recall, 62% discarded).
+
 Each fix is a separate commit with the evidence in its message.
 
 ---
@@ -99,8 +113,10 @@ Each fix is a separate commit with the evidence in its message.
 
 - **Phase 4 run:** the closed-loop machinery is built and tested, but a real *detection-accuracy* gain
   needs box labels Nexar lacks (CODA or BDD). The label-free path runs today and proves the mechanics.
-- **Better Stage-1 signals:** scaling data 200 → 1,300 clips did not raise AUC, so fewer false alarms
-  need new features (e.g. ego-path looming), plus splitting long active stretches in the window slicer.
+- **Better Stage-1 signals:** more data (200 → 1,300 clips) and two bug fixes all left AUC at ~0.85.
+  The motion features carry the signal (ego-path looming 0.64, inverse TTC 0.64, shake 0.61); image
+  quality and detector uncertainty are ~0.50 on Nexar. Fewer false alarms need a new kind of signal
+  (e.g. relative motion of the lead vehicle, lane-relative position), not more of the same.
 - **Real-time / on-vehicle:** out of scope; this is an offline analysis and triage tool.
 - **Perception-failure causes** aren't independently validated (needs CARLA counterfactuals or human review).
 

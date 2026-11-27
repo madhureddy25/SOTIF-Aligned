@@ -177,6 +177,14 @@ sotif-miner train-stage1 --run runs\nexar_v5 --root D:\data\nexar
 ```
 Compare the `train-stage1` output with `runs\model_1300\stage1_cv_metrics.json` (step AUC 0.851 before).
 Set `mining: {split_long_stretches: false}` in a config to reproduce the old single-window slicer.
+Before testing the new model on held-out clips, re-feature them too (a model must see the same features
+it was trained on):
+```
+sotif-miner refeature --run runs\nexar_heldout --config configs\nexar.yaml --out runs\nexar_heldout_v5
+sotif-miner rescore --run runs\nexar_heldout_v5 --model runs\nexar_v5\stage1_model.joblib
+sotif-miner nexar-eval --run runs\nexar_heldout_v5 --root D:\data\nexar --split train --bootstrap 2000 --metrics-kind held_out --out-metrics runs\heldout_v5_ci.json
+```
+High-recall triage: `sotif-miner train-stage1 --run runs\nexar_v5 --root D:\data\nexar --threshold 0.2`.
 
 ## Phase 4 — closed loop (fine-tune the detector on mined failures, prove it helps)
 Label-free (runs with what you have). The honest proof is re-mining held-out clips, not pseudo-label AP.
