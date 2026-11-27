@@ -30,9 +30,10 @@ headline number is reported with a confidence interval and an honest limitations
 | VLM root-cause JSON validity | 99.8% | — |
 
 The Stage-1 model was trained on 200 clips and tested on **1,100 disjoint clips** (550 near-miss / 550 normal).
-Cross-validation predicted recall 0.90, which sits inside the held-out 95% CI — **no overfitting.**
-An earlier 100-clip held-out test read 0.91 recall and 0.73 early recall; at 11× the sample size, early
-recall settles at 0.65 (the smaller test was optimistic), and we report the larger test.
+5-fold cross-validation on the 200 training clips predicted recall 0.90 [0.84, 0.95] and early recall
+0.67 [0.58, 0.76]; the 1,100-clip held-out test delivered 0.88 and 0.65 — both inside the CV intervals,
+so **no overfitting.** An earlier 100-clip held-out test read 0.91 / 0.73; the larger test shows that 0.73
+early recall was the outlier, so we report the 1,100-clip numbers.
 141 events were diagnosed and consolidated into **21 ranked failure modes**.
 
 ---

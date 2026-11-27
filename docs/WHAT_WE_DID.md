@@ -36,7 +36,8 @@ self-contained HTML report. Five decoupled stages:
 - Built a **21-mode failure taxonomy**, 100 events in recurring (Area 2) modes, 13 novel (Area 3).
 - Mined the **full Nexar train split: all 1,500 clips** (200 to train Stage 1; 200 + 1,100 held out), ~46 s per clip on the 3050.
 - **Held-out mining recall 0.88** (95 % CI 0.86–0.91) on **1,100 clips** the model never saw (trained on
-  200) — the cross-validated 0.90 sits inside the CI, so the model **generalizes** (no overfitting).
+  200). 5-fold CV on the training clips predicted 0.90 [0.84, 0.95] recall and 0.67 [0.58, 0.76] early
+  recall; held-out gave 0.88 and 0.65 — inside both CV intervals, so the model **generalizes**.
 - Flags 65 % (CI 0.61–0.69) of near-misses **before** the official alert time, 3.1 s median early warning
   (CI 2.7–3.4), discards 65 % of video, at 3.2 false windows/min (CI 3.1–3.4) on normal driving.
 
@@ -66,7 +67,8 @@ This is the part that makes the results credible — we did not paper over anyth
 
 5. **A small held-out test was optimistic.** The first held-out test (100 clips) read recall 0.91 and
    early recall 0.73. Scaling the held-out set to 1,100 clips gave recall 0.88 (CIs overlap — consistent)
-   but early recall 0.65, with the old 0.73 *outside* the new CI. → We report the 1,100-clip numbers and
+   but early recall 0.65, with the old 0.73 *outside* the new CI — and 0.65 matches the 0.67 that
+   cross-validation had predicted, so the 100-clip figure was the outlier. → We report the 1,100-clip numbers and
    keep the 100-clip result only as history. It also surfaced that 93 % of normal clips get ≥1 window:
    the miner localizes events within a clip rather than classifying clips, now stated in the limitations.
 
