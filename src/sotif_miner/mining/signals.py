@@ -222,3 +222,111 @@ def rarity_signal(step_emb: np.ndarray, corpus: np.ndarray | None, step_s: float
     med = np.median(dists)
     mad = max(np.median(np.abs(dists - med)) * 1.4826, 0.03)
     return np.clip((dists - med) / (4 * mad), 0, 1)
+
+
+ROAD_USERS = {"car", "truck", "bus", "motorcycle", "bicycle", "person", "train"}
+VRU = {"person", "bicycle", "motorcycle"}
+
+
+def _lead_series(hist: list[FrameRecord], w: int, h: int) -> tuple[int | None, list[tuple[float, float, float]]]:
+    """The lead road user (lowest box bottom inside the ego corridor) in the latest frame that has one,
+    and its (t, width, bottom) series over `hist`."""
+    lead = None
+    for f in reversed(hist):
+        cand = [t for t in f.tracks if t.cls in ROAD_USERS and in_ego_corridor(t.box, w, h)]
+        if cand:
+            lead = max(cand, key=lambda t: t.box[3]).track_id
+            break
+    if lead is None:
+        return None, []
+    return lead, [(f.t, max(t.box[2] - t.box[0], 1.0), t.box[3]) for f in hist for t in f.tracks
+                  if t.track_id == lead]
+
+
+def _approach_rates(hist: list[FrameRecord], w: int, h: int) -> dict[int, tuple[float, float, float]]:
+    """Per track: (lateral speed toward the image centre in box widths/s, distance to the ego corridor in
+    box widths, height / h), with the camera's own motion removed. The tracker's motion compensation maps a
+    static point p to s*p + (dx, dy) between consecutive frames; the residual is the object's own motion."""
+    out: dict[int, tuple[float, float, float]] = {}
+    prev_box: dict[int, tuple] = {}
+    res: dict[int, list[float]] = defaultdict(list)
+    last: dict[int, tuple] = {}
+    for i, f in enumerate(hist):
+        for t in f.tracks:
+            if t.cls not in ROAD_USERS:
+                continue
+            if i and t.track_id in prev_box:
+                p = prev_box[t.track_id]
+                pcx = (p[0] + p[2]) / 2
+                cx = (t.box[0] + t.box[2]) / 2
+                expected = f.ego_scale * pcx + f.ego_dx
+                bw = max(t.box[2] - t.box[0], 1.0)
+                toward = -1.0 if cx > w / 2 else 1.0
+                res[t.track_id].append(toward * (cx - expected) / bw)
+            last[t.track_id] = t.box
+        prev_box = {t.track_id: t.box for t in f.tracks}
+    dt = (hist[-1].t - hist[0].t) / max(len(hist) - 1, 1) if len(hist) > 1 else 0.1
+    for tid, r in res.items():
+        b = last[tid]
+        if len(r) < 3 or b[3] < 0.45 * h or (b[2] - b[0]) < 0.03 * w:
+            continue
+        cx, bw = (b[0] + b[2]) / 2, b[2] - b[0]
+        u = min(1.0, max(0.0, (b[3] - 0.45 * h) / (0.55 * h)))
+        gap = max(0.0, abs(cx - w / 2) - (0.15 + 0.20 * u) * w) / bw
+        out[tid] = (float(np.median(r[-10:])) / max(dt, 1e-3), gap, (b[3] - b[1]) / h)
+    return out
+
+
+def scene_features(frames: list[FrameRecord], prev_frames: list[FrameRecord], fps: float, w: int, h: int
+                   ) -> tuple[dict, set[int]]:
+    """Interaction cues the per-track signals miss (all from cached tracks; no detection re-run).
+
+    l.* lead road user in the ego corridor: closing rate (d ln width/dt over ~1 s), its change (braking
+        lead), size (proximity) and size x closing.
+    x.* lateral intrusion: fastest approach toward the image centre (box widths/s, camera motion removed),
+        the inverse time until a road user enters the ego corridor, nearest VRU size, corridor occupancy.
+    e.decel / e.speed / e.pitch_dir: signed ego-motion (expansion drop = braking), unlike the |jerk| features.
+    """
+    hist = prev_frames[-int(round(1.5 * fps)):] + frames
+    feats: dict[str, float] = {}
+    implicated: set[int] = set()
+
+    lead, sr = _lead_series(hist, w, h)
+    inv_ttc = accel = 0.0
+    size = sr[-1][1] / w if sr else 0.0
+    if len(sr) >= 4:
+        ts, ws, _ = np.array(sr).T
+        lw = np.log(ws)
+        recent = ts >= ts[-1] - 1.0
+        if recent.sum() >= 3 and np.ptp(ts[recent]) > 0.3:
+            inv_ttc = float(np.polyfit(ts[recent], lw[recent], 1)[0])
+        early = ts < ts[-1] - 0.5
+        if early.sum() >= 3 and np.ptp(ts[early]) > 0.3:
+            accel = inv_ttc - float(np.polyfit(ts[early], lw[early], 1)[0])
+        if inv_ttc > 0.3:
+            implicated.add(lead)
+    feats.update({"l.present": float(lead is not None), "l.size": size, "l.inv_ttc": inv_ttc,
+                  "l.closing_accel": accel, "l.danger": size * max(inv_ttc, 0.0)})
+
+    rates = _approach_rates(hist, w, h)
+    cut_in = entry = 0.0
+    for tid, (v, gap, _) in rates.items():
+        cut_in = max(cut_in, v)
+        if v > 0.2 and gap > 0:
+            e = v / gap
+            entry = max(entry, e)
+            if e > 1.0:
+                implicated.add(tid)
+    last = frames[-1]
+    vru = [(t.box[3] - t.box[1]) / h for t in last.tracks
+           if t.cls in VRU and t.box[3] > 0.45 * h and abs((t.box[0] + t.box[2]) / 2 - w / 2) < 0.4 * w]
+    n_corr = sum(1 for t in last.tracks if t.cls in ROAD_USERS and in_ego_corridor(t.box, w, h))
+    feats.update({"x.cut_in": cut_in, "x.entry_rate": min(entry, 5.0), "x.vru_near": max(vru, default=0.0),
+                  "x.n_corridor": float(n_corr)})
+
+    cur = np.array([[f.ego_scale - 1.0, f.ego_dy / max(h, 1)] for f in frames])
+    ref = prev_frames[-int(round(fps)):]
+    pm = np.array([[f.ego_scale - 1.0, f.ego_dy / max(h, 1)] for f in ref]).mean(axis=0) if ref else cur.mean(axis=0)
+    m = cur.mean(axis=0)
+    feats.update({"e.speed": float(m[0]), "e.decel": float(pm[0] - m[0]), "e.pitch_dir": float(m[1] - pm[1])})
+    return feats, implicated

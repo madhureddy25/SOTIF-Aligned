@@ -186,6 +186,26 @@ sotif-miner nexar-eval --run runs\nexar_heldout_v5 --root D:\data\nexar --split 
 ```
 High-recall triage: `sotif-miner train-stage1 --run runs\nexar_v5 --root D:\data\nexar --threshold 0.2`.
 
+## Interaction cues (lead vehicle, cut-ins, VRUs, signed braking) — ablation
+New features from cached tracks (no detection re-run). Re-feature from a run that has `perception\`
+(e.g. `nexar_v4`), then train twice on the SAME features — without and with the new cues — so the only
+difference is the cues:
+```
+sotif-miner refeature --run runs\nexar_v4 --config configs\nexar.yaml --out runs\nexar_v6
+sotif-miner nexar-diagnose --run runs\nexar_v6
+sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar --legacy-features
+sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar
+```
+`--legacy-features` writes `stage1_model_legacy.joblib` / `stage1_cv_metrics_legacy.json`, so the two runs do
+not overwrite each other. Compare the step AUCs (0.850 before) and the threshold tables at recall >= 0.9.
+Only if the cues help, confirm on the untouched held-out clips:
+```
+sotif-miner refeature --run runs\nexar_heldout --config configs\nexar.yaml --out runs\nexar_heldout_v6
+sotif-miner rescore --run runs\nexar_heldout_v6 --model runs\nexar_v6\stage1_model.joblib
+sotif-miner nexar-eval --run runs\nexar_heldout_v6 --root D:\data\nexar --split train --bootstrap 2000 --metrics-kind held_out --out-metrics runs\heldout_v6_ci.json
+```
+Models trained before these cues still load and predict (they keep their own feature list).
+
 ## Phase 4 — closed loop (fine-tune the detector on mined failures, prove it helps)
 Label-free (runs with what you have). The honest proof is re-mining held-out clips, not pseudo-label AP.
 ```

@@ -33,6 +33,7 @@ from .signals import (
     ego_motion_features,
     optical_density_signal,
     rarity_signal,
+    scene_features,
     uncertainty_signal,
     vanish_events,
 )
@@ -59,7 +60,23 @@ FEATURES: dict[str, tuple[str, int, float]] = {
     "o.sharpness": ("optical_density", -1, 0.04),
     "o.active_tracks": ("optical_density", +1, 2.0),
     "o.collapse": ("optical_density", +1, 0.1),
+    # Interaction cues (signals.scene_features). Learned model only until they prove themselves.
+    "l.present": ("continuity", +1, 0.5),
+    "l.size": ("continuity", +1, 0.02),
+    "l.inv_ttc": ("continuity", +1, 0.1),
+    "l.closing_accel": ("continuity", +1, 0.15),
+    "l.danger": ("continuity", +1, 0.02),
+    "x.cut_in": ("continuity", +1, 0.2),
+    "x.entry_rate": ("continuity", +1, 0.2),
+    "x.vru_near": ("continuity", +1, 0.02),
+    "x.n_corridor": ("continuity", +1, 0.5),
+    "e.speed": ("continuity", -1, 0.001),
+    "e.decel": ("continuity", +1, 0.001),
+    "e.pitch_dir": ("continuity", +1, 0.002),
 }
+# Features the hand-weighted rule scorer ignores (the learned model reads all of FEATURES). A weak cue
+# added to the rules as an equal max-pooled vote drags the combined score down (c.term_norm, journal #7).
+LEARNED_ONLY = {n for n in FEATURES if n[:2] in ("l.", "x.")} | {"e.speed", "e.decel", "e.pitch_dir"}
 
 
 def compute_features(log: PerceptionLog, cfg: dict, corpus: np.ndarray | None = None
@@ -91,13 +108,15 @@ def compute_features(log: PerceptionLog, cfg: dict, corpus: np.ndarray | None = 
             _, cd, ci = continuity_signal(fr, prev, log.fps, log.width, log.height, m["looming_rate"], gone)
         _, od, _ = optical_density_signal(fr, [] if log.single_frame else prev, m)
         ed = {} if log.single_frame else ego_motion_features(fr, prev, log.width, log.height)
+        sd, si = ({}, set()) if log.single_frame else scene_features(fr, prev, log.fps, log.width, log.height)
         f = {"t": float(fr[0].t), "frame": int(fr[0].frame), "rarity": float(rarity[k])}
         f.update({f"u.{a}": float(b) for a, b in ud.items()})
         f.update({f"c.{a}": float(b) for a, b in cd.items()})
         f.update({f"o.{a}": float(b) for a, b in od.items()})
         f.update({f"e.{a}": float(b) for a, b in ed.items()})
+        f.update({k: float(v) for k, v in sd.items()})
         feats.append(f)
-        implicated.append(ui | ci)
+        implicated.append(ui | ci | si)
     return feats, implicated
 
 
@@ -117,7 +136,7 @@ def score_features(feats: list[dict], cfg: dict, single_frame: bool = False) -> 
     gap = max(0, int(round(m.get("baseline_gap_s", 0.5) / step_s)))
     z_low, z_high = m.get("z_low", 2.5), m.get("z_high", 6.0)
     loom_abs = m.get("looming_abs", 1.2)  # relative area growth / s; ~TTC < 1.7 s
-    names = list(FEATURES)
+    names = [n for n in FEATURES if n not in LEARNED_ONLY]
     X = np.array([[f.get(n, 0.0) for n in names] for f in feats], dtype=float) if feats else np.zeros((0, len(names)))
 
     samples = []
