@@ -139,6 +139,12 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
   (Nexar has no detector-failure labels — that needs CARLA counterfactuals or human review); the
   domain is US/clear-day-heavy; this **mines** events in recorded video, it does **not predict** crashes
   before they are visible.
+- **Diagnosis explains a window; it does not verify it.** On 123 false-alarm windows from held-out
+  *normal* clips, the cards look like real events: 55% AGENT_BEHAVIOR and 24% INCONCLUSIVE (vs. 44% and
+  32% on near-miss windows), 100% valid JSON. The root-cause rules read the same telemetry that fired the
+  window (TTC ≤ 2 s or strong ego-path looming → AGENT_BEHAVIOR), so an "accepted" card says *why* the
+  miner flagged the moment, not that a near-miss happened. Whether those windows are unlabelled close
+  calls needs human review.
 - **Localizer, not a clip classifier:** 78% of normal-driving clips still get at least one window (down
   from 93%). The value is in narrowing each clip to a few seconds (75% of video discarded, ~2 false
   windows/min), not in declaring whole clips safe.

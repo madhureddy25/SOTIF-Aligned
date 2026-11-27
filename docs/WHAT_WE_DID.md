@@ -142,6 +142,20 @@ This is the part that makes the results credible — we did not paper over anyth
     (`stage1_model_drop.joblib`). Writing the tests also showed `c.active_tracks` and `o.glare` were
     never model inputs (stored only), so they were never a shortcut risk.
 
+12. **Can diagnosis tell a false alarm from a real event? No — and that is by design.** We diagnosed the
+    123 windows the current model fires on the 100 held-out *normal* clips (out-of-sample false alarms).
+    All 377 VLM calls returned valid JSON; 120 cards were accepted. Labels: AGENT_BEHAVIOR 68 (55%),
+    INCONCLUSIVE 30 (24%), dynamic occlusion 11, perception gap 10, optical 4 — at least as "hazardous" as a
+    near-miss sample (44% AGENT_BEHAVIOR, 32% INCONCLUSIVE). Reading the code explains it: attribution is
+    deterministic over telemetry, and AGENT_BEHAVIOR fires on TTC ≤ 2 s or strong ego-path looming — the
+    same measurements that made Stage 1 flag the window; the VLM's descriptions echo them ("closing at
+    2.74 m/s with a 0.7 s TTC"). So a card explains *why* a window fired; it is not independent evidence
+    that it was dangerous, and it cannot measure how many Nexar "normal" clips hide unlabelled close
+    calls. That needs a human look at a sample (keyframes are saved per window).
+    Also measured: a 20-clip timing run gave 34 windows at 8.9 s per VLM call (~27 s per window), so all
+    650 near-miss clips (~1,100 windows) take ~9-10 h on the 3050; two diagnoses sharing the GPU slowed
+    calls to 22 s.
+
 Each fix is a separate commit with the evidence in its message.
 
 ---
@@ -159,9 +173,11 @@ Each fix is a separate commit with the evidence in its message.
 
 - **Phase 4 run:** the closed-loop machinery is built and tested, but a real *detection-accuracy* gain
   needs box labels Nexar lacks (CODA or BDD). The label-free path runs today and proves the mechanics.
-- **Inspect the remaining false alarms:** clip markers and absolute levels are ruled out as their cause
-  (#11). Diagnose the windows in normal clips (`diagnose --only negative`) to see whether they are
-  unlabelled close calls or genuine misses of context.
+- **Human review of false alarms:** clip markers and absolute levels are ruled out as their cause (#11),
+  and diagnosis cannot separate them from events (#12). Label ~30 false-alarm windows by eye (real close
+  call / normal driving) to estimate label noise in Nexar's normal clips.
+- **Full-split taxonomy:** re-run the taxonomy once all ~1,100 near-miss windows are diagnosed (the
+  current 141-card run used a partial diagnosis).
 - **Lane-relative cues (Phase B):** lane position needs pixels the perception cache does not keep; a
   decode-only pass (no detector) would add it. Worth it only if the confound check leaves headroom.
 - **Real-time / on-vehicle:** out of scope; this is an offline analysis and triage tool.
