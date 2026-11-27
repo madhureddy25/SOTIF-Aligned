@@ -54,7 +54,7 @@ We retrained Stage 1 on all 1,300 mined clips and re-tested on the **same 200 he
 (AUC) unchanged; the retrained model sits at a different point on the *same* trade-off curve — earlier
 warnings, slightly more false windows. The next gain must come from better signals, not more clips.
 Cross-validation over all 1,300 clips agrees: recall 0.91 [0.89, 0.93], early recall 0.72 [0.68, 0.75],
-3.2 false windows/min, 63% of video discarded. Fixing two Stage-1 bugs (below) also left AUC at 0.850 —
+3.2 false windows/min, 63% of video discarded. Fixing two Stage-1 bugs ([journal](docs/WHAT_WE_DID.md) #7, #8) also left AUC at 0.850 —
 three independent changes, one ceiling. On the held-out clips the fixed model catches 95 of 100
 near-misses (vs 91), paid for with more windows (3.8/min, 60% discarded) — again a move along the same
 curve, and within the overlapping CIs of 100 clips.
