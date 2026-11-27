@@ -127,6 +127,35 @@ This is the part that makes the results credible — we did not paper over anyth
     from ~0.60 to 0.71–0.80 within clips: the driver's reaction marks the moment but its size varies
     between drivers, which pooled AUC hides.
 
+11. **Where do the remaining false alarms come from? Not from shortcuts.** 72% of normal clips still got a
+    window. Two hypotheses, each a clean ablation on the same 1,300 re-featured clips (5-fold CV, recall 0.92):
+    - *Clip markers* (`--drop markers`: corridor occupancy, active tracks, saturation, lead present — the
+      model inputs that are ~0.5 within clips): AUC 0.917 → 0.917, 1.80 → 1.83 false windows/min. On the
+      200 held-out clips: recall 0.92 both, 2.1 → 2.3 false windows/min (overlapping CIs). No effect.
+    - *Absolute levels* (`--no-raw`, z-scores vs. each clip's own baseline only): AUC 0.917 → 0.902, false
+      windows 1.80 → **3.11**/min, normal clips with a window 0.72 → 0.95. Absolute context (how close the
+      lead really is, how fast the ego car moves) is what separates routine change from danger.
+    So the model is not leaning on "busy clip" shortcuts; the remaining false alarms are risky-*looking*
+    moments in normal driving — some likely unlabelled close calls. Next: diagnose the false-alarm
+    windows of normal clips with the VLM to see what they are. The no-markers model is equivalent and
+    drops the inputs the confound check flagged, so it is the recommended model
+    (`stage1_model_drop.joblib`). Writing the tests also showed `c.active_tracks` and `o.glare` were
+    never model inputs (stored only), so they were never a shortcut risk.
+
+12. **Can diagnosis tell a false alarm from a real event? No — and that is by design.** We diagnosed the
+    123 windows the current model fires on the 100 held-out *normal* clips (out-of-sample false alarms).
+    All 377 VLM calls returned valid JSON; 120 cards were accepted. Labels: AGENT_BEHAVIOR 68 (55%),
+    INCONCLUSIVE 30 (24%), dynamic occlusion 11, perception gap 10, optical 4 — at least as "hazardous" as a
+    near-miss sample (44% AGENT_BEHAVIOR, 32% INCONCLUSIVE). Reading the code explains it: attribution is
+    deterministic over telemetry, and AGENT_BEHAVIOR fires on TTC ≤ 2 s or strong ego-path looming — the
+    same measurements that made Stage 1 flag the window; the VLM's descriptions echo them ("closing at
+    2.74 m/s with a 0.7 s TTC"). So a card explains *why* a window fired; it is not independent evidence
+    that it was dangerous, and it cannot measure how many Nexar "normal" clips hide unlabelled close
+    calls. That needs a human look at a sample (keyframes are saved per window).
+    Also measured: a 20-clip timing run gave 34 windows at 8.9 s per VLM call (~27 s per window), so all
+    650 near-miss clips (~1,100 windows) take ~9-10 h on the 3050; two diagnoses sharing the GPU slowed
+    calls to 22 s.
+
 Each fix is a separate commit with the evidence in its message.
 
 ---
@@ -144,10 +173,11 @@ Each fix is a separate commit with the evidence in its message.
 
 - **Phase 4 run:** the closed-loop machinery is built and tested, but a real *detection-accuracy* gain
   needs box labels Nexar lacks (CODA or BDD). The label-free path runs today and proves the mechanics.
-- **Fewer false alarms from clip markers:** the model may use clip-level cues (corridor occupancy, active
-  tracks, glare) as a prior that busy clips are risky, which would show up as windows in busy normal
-  clips (78% of normal clips get one). Ablate those cues, or normalize ego-motion jerks per clip (they are
-  strong within clips but noisy between drivers), and check false windows at equal recall.
+- **Human review of false alarms:** clip markers and absolute levels are ruled out as their cause (#11),
+  and diagnosis cannot separate them from events (#12). Label ~30 false-alarm windows by eye (real close
+  call / normal driving) to estimate label noise in Nexar's normal clips.
+- **Full-split taxonomy:** re-run the taxonomy once all ~1,100 near-miss windows are diagnosed (the
+  current 141-card run used a partial diagnosis).
 - **Lane-relative cues (Phase B):** lane position needs pixels the perception cache does not keep; a
   decode-only pass (no detector) would add it. Worth it only if the confound check leaves headroom.
 - **Real-time / on-vehicle:** out of scope; this is an offline analysis and triage tool.

@@ -29,6 +29,29 @@ from .scorer import FEATURES, score_features
 NAMES = list(FEATURES)
 RAW_EXTRA = ["rarity"]
 # Feature list before the interaction cues were added: models saved without `names` were trained on it.
+# Clip markers among the model's inputs: within-clip AUC ~0.5 in the confound check (journal #10) — they mark
+# the kind of clip, not the moment. (c.active_tracks and o.glare are stored but never were model inputs.)
+# `train-stage1 --drop markers` removes them.
+CLIP_MARKERS = ["x.n_corridor", "o.active_tracks", "o.saturation", "l.present"]
+
+
+def select_names(drop: str) -> list[str]:
+    """NAMES minus a comma list of features; an entry ending in '*' is a prefix, 'markers' = CLIP_MARKERS."""
+    out = list(NAMES)
+    for item in (x.strip() for x in drop.split(",") if x.strip()):
+        if item == "markers":
+            gone = set(CLIP_MARKERS)
+        elif item.endswith("*"):
+            gone = {n for n in out if n.startswith(item[:-1])}
+        else:
+            gone = {item}
+        unknown = gone - set(NAMES)
+        if unknown:
+            raise ValueError(f"unknown feature(s): {sorted(unknown)}")
+        out = [n for n in out if n not in gone]
+    return out
+
+
 LEGACY_NAMES = [n for n in NAMES if not (n[:2] in ("l.", "x.") or n in ("e.speed", "e.decel", "e.pitch_dir"))]
 
 
@@ -41,9 +64,10 @@ class Stage1Model:
     n_features: int
     cv_report: dict | None = None
     names: list[str] | None = None  # feature list it was trained on; None = LEGACY_NAMES (older models)
+    raw: bool = True  # False: z-scores only (no absolute levels); older models used raw values too
 
     def predict_steps(self, feats: list[dict], cfg: dict) -> np.ndarray:
-        X = design_matrix(feats, cfg, self.offsets, self.names or LEGACY_NAMES)
+        X = design_matrix(feats, cfg, self.offsets, self.names or LEGACY_NAMES, self.raw)
         return self.model.predict_proba(X)[:, 1] if len(X) else np.zeros(0)
 
 
@@ -69,7 +93,11 @@ def zscores(feats: list[dict], cfg: dict, names: list[str] | None = None) -> np.
     return np.clip(Z, -20, 20)
 
 
-def design_matrix(feats: list[dict], cfg: dict, offsets: list[int], names: list[str] | None = None) -> np.ndarray:
+def design_matrix(feats: list[dict], cfg: dict, offsets: list[int], names: list[str] | None = None,
+                  raw_levels: bool = True) -> np.ndarray:
+    """Z-scores (vs. the clip's own recent baseline) at each step offset, plus — unless `raw_levels` is
+    False — the raw feature values. Raw levels let the model use clip-level differences (busy traffic,
+    glare) as a prior; z-scores only carry change within the clip."""
     if not feats:
         return np.zeros((0, 0))
     names = names or NAMES
@@ -84,7 +112,7 @@ def design_matrix(feats: list[dict], cfg: dict, offsets: list[int], names: list[
         else:
             sh[-off:] = Z[: n + off]
         blocks.append(sh)
-    return np.hstack(blocks + [raw])
+    return np.hstack(blocks + [raw]) if raw_levels else np.hstack(blocks)
 
 
 def step_labels(feats: list[dict], positive: bool, event_s: float | None, alert_s: float | None,
@@ -121,13 +149,14 @@ def _balanced_fit(model, X: np.ndarray, y: np.ndarray):
     return model.fit(X, y)
 
 
-def build_dataset(recs: list[dict], cfg: dict, offsets: list[int], names: list[str] | None = None):
+def build_dataset(recs: list[dict], cfg: dict, offsets: list[int], names: list[str] | None = None,
+                  raw_levels: bool = True):
     Xs, ys, groups = [], [], []
     for gi, r in enumerate(recs):
         feats = r.get("features") or []
         if not feats:
             continue
-        X = design_matrix(feats, cfg, offsets, names)
+        X = design_matrix(feats, cfg, offsets, names, raw_levels)
         y = step_labels(feats, bool(r.get("positive")), r.get("event_s"), r.get("alert_s"))
         keep = y >= 0
         Xs.append(X[keep])
@@ -141,7 +170,7 @@ def offsets_for(causal: bool) -> list[int]:
 
 
 def cross_validate(recs: list[dict], cfg: dict, causal: bool = False, folds: int = 5, seed: int = 0,
-                   names: list[str] | None = None) -> dict[str, np.ndarray]:
+                   names: list[str] | None = None, raw_levels: bool = True) -> dict[str, np.ndarray]:
     """Out-of-fold step probabilities per clip_id (every clip scored by a model that never saw it).
     Folds are assigned per clip (positives and negatives interleaved), so grouping is by clip."""
     offsets = offsets_for(causal)
@@ -156,21 +185,22 @@ def cross_validate(recs: list[dict], cfg: dict, causal: bool = False, folds: int
     for f in range(folds):
         train = [recs[i] for i in clip_idx if fold_of[i] != f]
         test = [recs[i] for i in clip_idx if fold_of[i] == f]
-        X, y, _ = build_dataset(train, cfg, offsets, names)
+        X, y, _ = build_dataset(train, cfg, offsets, names, raw_levels)
         if len(np.unique(y)) < 2:
             raise ValueError("training fold has a single class; need positive and negative clips")
         m = _balanced_fit(_new_model(seed), X, y)
         for r in test:
-            oof[r["clip_id"]] = m.predict_proba(design_matrix(r["features"], cfg, offsets, names))[:, 1]
+            oof[r["clip_id"]] = m.predict_proba(design_matrix(r["features"], cfg, offsets, names, raw_levels))[:, 1]
     return oof
 
 
 def fit(recs: list[dict], cfg: dict, causal: bool = False, threshold: float = 0.5, seed: int = 0,
-        names: list[str] | None = None) -> Stage1Model:
+        names: list[str] | None = None, raw_levels: bool = True) -> Stage1Model:
     offsets = offsets_for(causal)
     names = list(names or NAMES)
-    X, y, _ = build_dataset(recs, cfg, offsets, names)
-    return Stage1Model(_balanced_fit(_new_model(seed), X, y), offsets, causal, threshold, X.shape[1], names=names)
+    X, y, _ = build_dataset(recs, cfg, offsets, names, raw_levels)
+    return Stage1Model(_balanced_fit(_new_model(seed), X, y), offsets, causal, threshold, X.shape[1], names=names,
+                       raw=raw_levels)
 
 
 def learned_samples(feats: list[dict], probs: np.ndarray, cfg: dict) -> list[SignalSample]:

@@ -139,6 +139,12 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
   (Nexar has no detector-failure labels — that needs CARLA counterfactuals or human review); the
   domain is US/clear-day-heavy; this **mines** events in recorded video, it does **not predict** crashes
   before they are visible.
+- **Diagnosis explains a window; it does not verify it.** On 123 false-alarm windows from held-out
+  *normal* clips, the cards look like real events: 55% AGENT_BEHAVIOR and 24% INCONCLUSIVE (vs. 44% and
+  32% on near-miss windows), 100% valid JSON. The root-cause rules read the same telemetry that fired the
+  window (TTC ≤ 2 s or strong ego-path looming → AGENT_BEHAVIOR), so an "accepted" card says *why* the
+  miner flagged the moment, not that a near-miss happened. Whether those windows are unlabelled close
+  calls needs human review.
 - **Localizer, not a clip classifier:** 78% of normal-driving clips still get at least one window (down
   from 93%). The value is in narrowing each clip to a few seconds (75% of video discarded, ~2 false
   windows/min), not in declaring whole clips safe.
@@ -149,7 +155,10 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
   Individual cues differ: lead-vehicle size drops from 0.70 pooled to 0.61 within clips (0.56 held-out),
   so it is partly a clip marker (closer traffic in near-miss clips); corridor occupancy, active tracks
   and glare fall to ~0.50 within clips — pure clip markers. Ego-motion jerks *rise* to 0.71–0.80 within
-  clips: the driver's reaction times the event but varies a lot between drivers.
+  clips: the driver's reaction times the event but varies a lot between drivers. Training without the
+  clip-marker inputs changes nothing (AUC 0.917 both; held-out 2.3 vs 2.1 false windows/min, overlapping
+  CIs), so the model does not lean on them; removing absolute levels instead nearly doubles false windows
+  (journal #11).
 - **High-recall mode:** the default threshold targets recall ≥ 0.9 with the most video discarded. For
   "miss nothing" triage, threshold 0.4 reaches **0.97 recall (0.83 before the alert)** while still
   discarding 65% of video (5-fold CV, 1,300 clips).

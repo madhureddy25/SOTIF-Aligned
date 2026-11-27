@@ -217,6 +217,27 @@ sotif-miner confound --run runs\nexar_heldout_v6 --root D:\data\nexar
 On a model-rescored run, `score.combined` is the learned model's probability; use the held-out run for it
 (on training clips it would be in-sample).
 
+## Diagnose the current model's windows (GPU, hours; resumable)
+`nexar_v6` was written by `refeature`, so it has no `perception\` folder; borrow `nexar_v4`'s with
+`--perception`. Apply the current model into a separate folder first (in-sample windows on training clips:
+fine for diagnosis, not for measuring recall):
+```
+sotif-miner rescore --run runs\nexar_v6 --model runs\nexar_v6\stage1_model.joblib --out runs\nexar_v6_diag
+sotif-miner diagnose --run runs\nexar_v6_diag --perception runs\nexar_v4 --only positive --limit 20
+sotif-miner diagnose --run runs\nexar_v6_diag --perception runs\nexar_v4 --only positive
+sotif-miner taxonomy --runs runs\nexar_v6_diag --out runs\taxonomy_v6
+```
+`--limit` counts clips (up to 2 windows each); time the first 20, then run the rest (Ctrl+C is safe).
+
+## False-alarm experiments (CPU, minutes each, on stored features)
+Leave out the clip markers (`--drop markers`), or give the model only change within each clip (`--no-raw`),
+and compare false windows/min at recall >= 0.9 with the full model. Each writes its own files:
+```
+sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar --drop markers
+sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar --no-raw
+sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar --drop markers --no-raw
+```
+
 ## Phase 4 — closed loop (fine-tune the detector on mined failures, prove it helps)
 Label-free (runs with what you have). The honest proof is re-mining held-out clips, not pseudo-label AP.
 ```
