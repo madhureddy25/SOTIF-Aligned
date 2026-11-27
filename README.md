@@ -41,21 +41,23 @@ early recall was the outlier, so we report the 1,100-clip numbers.
 We retrained Stage 1 on all 1,300 mined clips and re-tested on the **same 200 held-out clips** (100 near-miss /
 100 normal) that neither model saw:
 
-| Same held-out clips | Trained on 200 | Trained on 1,300 |
-|---|---|---|
-| Recall | 0.91 [0.85, 0.96] | 0.91 [0.85, 0.96] |
-| Flagged before alert | 0.73 | 0.76 [0.67, 0.84] |
-| Median early-warning lead | 3.3 s | **4.2 s** [3.6, 5.2] |
-| False windows / minute | **3.1** [2.8, 3.4] | 3.4 [3.1, 3.8] |
-| Video discarded | **0.67** [0.65, 0.69] | 0.63 [0.61, 0.66] |
-| Step-level AUC (5-fold CV) | 0.855 | 0.851 |
+| Same held-out clips | Trained on 200 | Trained on 1,300 | 1,300 + Stage-1 fixes |
+|---|---|---|---|
+| Recall | 0.91 [0.85, 0.96] | 0.91 [0.85, 0.96] | 0.95 [0.90, 0.99] |
+| Flagged before alert | 0.73 | 0.76 [0.67, 0.84] | 0.78 [0.69, 0.86] |
+| Median early-warning lead | 3.3 s | **4.2 s** [3.6, 5.2] | 3.5 s [2.7, 4.5] |
+| False windows / minute | **3.1** [2.8, 3.4] | 3.4 [3.1, 3.8] | 3.8 [3.4, 4.2] |
+| Video discarded | **0.67** [0.65, 0.69] | 0.63 [0.61, 0.66] | 0.60 [0.58, 0.63] |
+| Step-level AUC (5-fold CV) | 0.855 | 0.851 | 0.850 |
 
 **Finding: Stage 1 is feature-limited, not data-limited.** 6.5× more data left the model's discrimination
 (AUC) unchanged; the retrained model sits at a different point on the *same* trade-off curve — earlier
 warnings, slightly more false windows. The next gain must come from better signals, not more clips.
 Cross-validation over all 1,300 clips agrees: recall 0.91 [0.89, 0.93], early recall 0.72 [0.68, 0.75],
 3.2 false windows/min, 63% of video discarded. Fixing two Stage-1 bugs (below) also left AUC at 0.850 —
-three independent changes, one ceiling.
+three independent changes, one ceiling. On the held-out clips the fixed model catches 95 of 100
+near-misses (vs 91), paid for with more windows (3.8/min, 60% discarded) — again a move along the same
+curve, and within the overlapping CIs of 100 clips.
 
 ---
 

@@ -94,7 +94,10 @@ This is the part that makes the results credible — we did not paper over anyth
    its single peak, dropping events elsewhere in the stretch (recall 0.79 at threshold 0.05 vs 0.94 at
    0.4). → Long stretches are now tiled into several windows. Recall is monotone again (0.99 at 0.05),
    which opens a high-recall triage mode: **0.98 recall, 0.88 before the alert, 38% of video discarded**
-   at threshold 0.2. The default operating point is unchanged (0.92 recall, 62% discarded).
+   at threshold 0.2. The default operating point is unchanged (0.92 recall, 62% discarded). On the
+   200 untouched held-out clips (re-featured), the fixed model reached recall 0.95 [0.90, 0.99] and early
+   recall 0.78, at 3.8 false windows/min and 60% discarded — more coverage for more windows, not a
+   better curve (AUC 0.850).
 
 Each fix is a separate commit with the evidence in its message.
 
