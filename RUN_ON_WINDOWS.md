@@ -135,6 +135,77 @@ sotif-miner report --run runs\nexar_v4 --taxonomy runs\taxonomy --data-root D:\d
 Note: the Nexar `test-public` split (`--test-metrics`) is an ANTICIPATION benchmark (clips end before the event);
 near-chance AP there is expected and does not reflect mining quality. The held-out MINING recall is the real number.
 
+## Large held-out test (mine the rest of train, score with the 200-clip model)
+Mine every remaining train clip into the same run (about 14 h on a 3050; resumable):
+```
+sotif-miner nexar --root D:\data\nexar --split train --config configs\nexar.yaml --skip 200 --out runs\nexar_v4
+```
+Ignore the summary it prints: it mixes in-sample learned scores (first 200) with default-scorer scores.
+Copy ONLY the newly mined clips into their own folder (by write time; must count 1100), then score:
+```
+New-Item -ItemType Directory runs\nexar_big_heldout\clips
+Get-ChildItem runs\nexar_v4\clips\*.json | Where-Object { $_.LastWriteTime -gt [datetime]'<start of the --skip 200 run>' } | Copy-Item -Destination runs\nexar_big_heldout\clips
+(Get-ChildItem runs\nexar_big_heldout\clips\*.json).Count
+sotif-miner rescore --run runs\nexar_big_heldout --model runs\nexar_v4\stage1_model.joblib
+sotif-miner nexar-eval --run runs\nexar_big_heldout --root D:\data\nexar --split train --bootstrap 2000 --metrics-kind held_out --out-metrics runs\big_heldout_ci.json
+```
+Do this BEFORE retraining train-stage1 on nexar_v4: a model retrained on these clips can no longer be tested on them.
+
+## Retrain Stage 1 on all mined clips (after the large held-out test)
+Back up the 200-clip model first (training overwrites it), retrain (minutes), then test on the 200
+clips that were never used for training (`runs\nexar_heldout`, clips 100–199 per label):
+```
+mkdir runs\baseline_200
+copy runs\nexar_v4\stage1_model.joblib runs\baseline_200\
+copy runs\nexar_v4\stage1_cv_metrics.json runs\baseline_200\
+sotif-miner train-stage1 --run runs\nexar_v4 --root D:\data\nexar
+sotif-miner rescore --run runs\nexar_heldout --model runs\nexar_v4\stage1_model.joblib
+sotif-miner nexar-eval --run runs\nexar_heldout --root D:\data\nexar --split train --bootstrap 2000 --metrics-kind held_out --out-metrics runs\heldout_1300_ci.json
+```
+Do not evaluate the retrained model on `runs\nexar_big_heldout`: it has now trained on those clips.
+
+## Re-feature after a feature fix (no detection re-run; CPU)
+Every mined clip caches its detections/tracks in `perception\*.json.gz`, so fixed or new feature code only
+needs `refeature` (writes a NEW run folder; the old one stays untouched), then retraining:
+```
+mkdir runs\model_1300
+copy runs\nexar_v4\stage1_model.joblib runs\model_1300\
+copy runs\nexar_v4\stage1_cv_metrics.json runs\model_1300\
+sotif-miner refeature --run runs\nexar_v4 --config configs\nexar.yaml --out runs\nexar_v5
+sotif-miner nexar-diagnose --run runs\nexar_v5
+sotif-miner train-stage1 --run runs\nexar_v5 --root D:\data\nexar
+```
+Compare the `train-stage1` output with `runs\model_1300\stage1_cv_metrics.json` (step AUC 0.851 before).
+Set `mining: {split_long_stretches: false}` in a config to reproduce the old single-window slicer.
+Before testing the new model on held-out clips, re-feature them too (a model must see the same features
+it was trained on):
+```
+sotif-miner refeature --run runs\nexar_heldout --config configs\nexar.yaml --out runs\nexar_heldout_v5
+sotif-miner rescore --run runs\nexar_heldout_v5 --model runs\nexar_v5\stage1_model.joblib
+sotif-miner nexar-eval --run runs\nexar_heldout_v5 --root D:\data\nexar --split train --bootstrap 2000 --metrics-kind held_out --out-metrics runs\heldout_v5_ci.json
+```
+High-recall triage: `sotif-miner train-stage1 --run runs\nexar_v5 --root D:\data\nexar --threshold 0.2`.
+
+## Interaction cues (lead vehicle, cut-ins, VRUs, signed braking) — ablation
+New features from cached tracks (no detection re-run). Re-feature from a run that has `perception\`
+(e.g. `nexar_v4`), then train twice on the SAME features — without and with the new cues — so the only
+difference is the cues:
+```
+sotif-miner refeature --run runs\nexar_v4 --config configs\nexar.yaml --out runs\nexar_v6
+sotif-miner nexar-diagnose --run runs\nexar_v6
+sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar --legacy-features
+sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar
+```
+`--legacy-features` writes `stage1_model_legacy.joblib` / `stage1_cv_metrics_legacy.json`, so the two runs do
+not overwrite each other. Compare the step AUCs (0.850 before) and the threshold tables at recall >= 0.9.
+Only if the cues help, confirm on the untouched held-out clips:
+```
+sotif-miner refeature --run runs\nexar_heldout --config configs\nexar.yaml --out runs\nexar_heldout_v6
+sotif-miner rescore --run runs\nexar_heldout_v6 --model runs\nexar_v6\stage1_model.joblib
+sotif-miner nexar-eval --run runs\nexar_heldout_v6 --root D:\data\nexar --split train --bootstrap 2000 --metrics-kind held_out --out-metrics runs\heldout_v6_ci.json
+```
+Models trained before these cues still load and predict (they keep their own feature list).
+
 ## Phase 4 — closed loop (fine-tune the detector on mined failures, prove it helps)
 Label-free (runs with what you have). The honest proof is re-mining held-out clips, not pseudo-label AP.
 ```

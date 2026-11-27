@@ -33,7 +33,9 @@ from .signals import (
     ego_motion_features,
     optical_density_signal,
     rarity_signal,
+    scene_features,
     uncertainty_signal,
+    vanish_events,
 )
 
 SIGNALS = ("uncertainty", "continuity", "optical_density", "rarity")
@@ -58,7 +60,23 @@ FEATURES: dict[str, tuple[str, int, float]] = {
     "o.sharpness": ("optical_density", -1, 0.04),
     "o.active_tracks": ("optical_density", +1, 2.0),
     "o.collapse": ("optical_density", +1, 0.1),
+    # Interaction cues (signals.scene_features). Learned model only until they prove themselves.
+    "l.present": ("continuity", +1, 0.5),
+    "l.size": ("continuity", +1, 0.02),
+    "l.inv_ttc": ("continuity", +1, 0.1),
+    "l.closing_accel": ("continuity", +1, 0.15),
+    "l.danger": ("continuity", +1, 0.02),
+    "x.cut_in": ("continuity", +1, 0.2),
+    "x.entry_rate": ("continuity", +1, 0.2),
+    "x.vru_near": ("continuity", +1, 0.02),
+    "x.n_corridor": ("continuity", +1, 0.5),
+    "e.speed": ("continuity", -1, 0.001),
+    "e.decel": ("continuity", +1, 0.001),
+    "e.pitch_dir": ("continuity", +1, 0.002),
 }
+# Features the hand-weighted rule scorer ignores (the learned model reads all of FEATURES). A weak cue
+# added to the rules as an equal max-pooled vote drags the combined score down (c.term_norm, journal #7).
+LEARNED_ONLY = {n for n in FEATURES if n[:2] in ("l.", "x.")} | {"e.speed", "e.decel", "e.pitch_dir"}
 
 
 def compute_features(log: PerceptionLog, cfg: dict, corpus: np.ndarray | None = None
@@ -75,6 +93,7 @@ def compute_features(log: PerceptionLog, cfg: dict, corpus: np.ndarray | None = 
         r = rarity_signal(log.step_embeddings, corpus, m["step_s"], k=m["rarity_k"])
         rarity[: min(len(r), n_steps)] = r[:n_steps]
 
+    vanish = {} if log.single_frame else vanish_events(log.frames, log.fps)
     feats, implicated = [], []
     for k in range(n_steps):
         fr = log.frames[k * step:(k + 1) * step]
@@ -85,16 +104,19 @@ def compute_features(log: PerceptionLog, cfg: dict, corpus: np.ndarray | None = 
         if log.single_frame:
             cd, ci = {}, set()
         else:
-            _, cd, ci = continuity_signal(fr, prev, log.fps, log.width, log.height, m["looming_rate"])
+            gone = [v for i in range(k * step, k * step + len(fr)) for v in vanish.get(i, [])]
+            _, cd, ci = continuity_signal(fr, prev, log.fps, log.width, log.height, m["looming_rate"], gone)
         _, od, _ = optical_density_signal(fr, [] if log.single_frame else prev, m)
         ed = {} if log.single_frame else ego_motion_features(fr, prev, log.width, log.height)
+        sd, si = ({}, set()) if log.single_frame else scene_features(fr, prev, log.fps, log.width, log.height)
         f = {"t": float(fr[0].t), "frame": int(fr[0].frame), "rarity": float(rarity[k])}
         f.update({f"u.{a}": float(b) for a, b in ud.items()})
         f.update({f"c.{a}": float(b) for a, b in cd.items()})
         f.update({f"o.{a}": float(b) for a, b in od.items()})
         f.update({f"e.{a}": float(b) for a, b in ed.items()})
+        f.update({k: float(v) for k, v in sd.items()})
         feats.append(f)
-        implicated.append(ui | ci)
+        implicated.append(ui | ci | si)
     return feats, implicated
 
 
@@ -114,7 +136,7 @@ def score_features(feats: list[dict], cfg: dict, single_frame: bool = False) -> 
     gap = max(0, int(round(m.get("baseline_gap_s", 0.5) / step_s)))
     z_low, z_high = m.get("z_low", 2.5), m.get("z_high", 6.0)
     loom_abs = m.get("looming_abs", 1.2)  # relative area growth / s; ~TTC < 1.7 s
-    names = list(FEATURES)
+    names = [n for n in FEATURES if n not in LEARNED_ONLY]
     X = np.array([[f.get(n, 0.0) for n in names] for f in feats], dtype=float) if feats else np.zeros((0, len(names)))
 
     samples = []
@@ -175,20 +197,38 @@ def slice_windows(samples: list[SignalSample], implicated: list[set[int]], cfg: 
             segs.append((k0, k))
         k += 1
 
-    raw = []
-    for k0, k1 in segs:
+    def _raw(k0: int, k1: int, start_t: float, end_t: float, grp: int | None) -> dict:
         pk = max(range(k0, k1 + 1), key=lambda i: samples[i].combined)
-        onset_t, peak_t = samples[k0].t, samples[pk].t
-        start_t = max(0.0, onset_t - m["pre_s"])
-        end_t = samples[k1].t + m["step_s"] + m["post_s"]
-        start_t, end_t = _clamp(start_t, end_t, peak_t, m["min_window_s"], m["max_window_s"])
         ids = Counter(i for j in range(k0, k1 + 1) for i in implicated[j]) if implicated else Counter()
-        raw.append({"start": start_t, "end": end_t, "onset": onset_t, "peak": peak_t, "pk": pk,
-                    "ids": ids, "k0": k0, "k1": k1})
+        return {"start": start_t, "end": end_t, "onset": samples[k0].t, "peak": samples[pk].t, "pk": pk,
+                "ids": ids, "k0": k0, "k1": k1, "grp": grp}
+
+    raw = []
+    for g, (k0, k1) in enumerate(segs):
+        start_t = max(0.0, samples[k0].t - m["pre_s"])
+        end_t = samples[k1].t + m["step_s"] + m["post_s"]
+        tile_end = min(end_t, (last_frame + 1) / fps) if fps > 0 else end_t  # tiles stay inside the clip
+        n_tiles = int(np.ceil((tile_end - start_t) / m["max_window_s"] - 1e-9))
+        if n_tiles > 1 and m.get("split_long_stretches", True):
+            end_t = tile_end
+            # A stretch longer than one window is tiled into equal windows (each > min_window_s), each
+            # around its own peak. Clamping it to one window around the global peak drops the rest of
+            # the stretch, and with it events that are not at the peak.
+            size = (end_t - start_t) / n_tiles
+            for j in range(n_tiles):
+                a, b = start_t + j * size, start_t + (j + 1) * size
+                idx = [i for i in range(k0, k1 + 1) if a <= samples[i].t < b]
+                if idx:
+                    raw.append(_raw(idx[0], idx[-1], a, b, g))
+            continue
+        r = _raw(k0, k1, start_t, end_t, None)
+        r["start"], r["end"] = _clamp(start_t, end_t, r["peak"], m["min_window_s"], m["max_window_s"])
+        raw.append(r)
 
     merged: list[dict] = []
     for r in sorted(raw, key=lambda r: r["start"]):
-        if merged and r["start"] <= merged[-1]["end"]:
+        same_stretch = r["grp"] is not None and merged and merged[-1]["grp"] == r["grp"]
+        if merged and r["start"] <= merged[-1]["end"] and not same_stretch:
             a = merged[-1]
             better = r if samples[r["pk"]].combined > samples[a["pk"]].combined else a
             a.update(start=min(a["start"], r["start"]), end=max(a["end"], r["end"]),

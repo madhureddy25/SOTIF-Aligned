@@ -28,6 +28,7 @@ mining:
   post_s: 2.0
   min_window_s: 4.0
   max_window_s: 8.0
+  split_long_stretches: true  # tile active stretches longer than max_window_s (false = old: one window at the peak)
   uncertainty_band: [0.25, 0.60]
   dense_tracks: 20
   dark_luminance: 0.18

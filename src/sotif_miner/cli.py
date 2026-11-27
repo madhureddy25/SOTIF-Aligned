@@ -507,7 +507,9 @@ def train_stage1(run: Path = typer.Option(..., help="Nexar run folder with store
                                                      "among those reaching this recall"),
                  config: Path | None = typer.Option(None, help="Override YAML"),
                  threshold: float | None = typer.Option(None, help="Use this threshold instead of the automatic choice"),
-                 out: Path | None = typer.Option(None, help="Model file (default <run>/stage1_model[_causal].joblib)")):
+                 out: Path | None = typer.Option(None, help="Model file (default <run>/stage1_model[_causal].joblib)"),
+                 legacy_features: bool = typer.Option(False, help="Train on the pre-interaction feature set "
+                                                      "(ablation: compare with/without the l.*/x.* cues)")):
     """Train the learned Stage 1 scorer; report clip-grouped cross-validated metrics per threshold."""
     import copy
 
@@ -516,7 +518,7 @@ def train_stage1(run: Path = typer.Option(..., help="Nexar run folder with store
 
     from .datasets.nexar import load_nexar
     from .eval.nexar_eval import ClipResult, _auc, evaluate_train
-    from .mining.learned import cross_validate, fit, learned_samples, step_labels
+    from .mining.learned import LEGACY_NAMES, NAMES, cross_validate, fit, learned_samples, step_labels
     from .mining.scorer import slice_windows
 
     cfg = load_config(config)
@@ -527,7 +529,9 @@ def train_stage1(run: Path = typer.Option(..., help="Nexar run folder with store
     clips = {c.clip_id: c for c in load_nexar(root, "train")}
     typer.echo(f"{len(recs)} clips ({sum(bool(r['positive']) for r in recs)} positive); "
                f"{'causal' if causal else 'offline (+-2 s context)'}; {folds}-fold CV grouped by clip ...")
-    oof = cross_validate(recs, cfg, causal, folds)
+    names = LEGACY_NAMES if legacy_features else NAMES
+    typer.echo(f"{len(names)} features ({'legacy set' if legacy_features else 'full set'})")
+    oof = cross_validate(recs, cfg, causal, folds, names=names)
 
     pe, pn = [], []
     for r in recs:
@@ -592,14 +596,15 @@ def train_stage1(run: Path = typer.Option(..., help="Nexar run folder with store
     cv_ci = bootstrap_train(oof_results, ("recall", "early_recall_before_alert", "median_lead_time_s",
                                           "negative_windows_per_minute", "compression"), n=1000)
     cv_ci["_meta"] = {"kind": "cross_validated_out_of_fold", "threshold": best_thr, "folds": folds,
-                      "n_clips": len(recs), "step_auc": step_auc, "causal": causal}
-    cv_path = run / f"stage1_cv_metrics{'_causal' if causal else ''}.json"
+                      "n_clips": len(recs), "step_auc": step_auc, "causal": causal, "n_features": len(names)}
+    tag = ("_causal" if causal else "") + ("_legacy" if legacy_features else "")
+    cv_path = run / f"stage1_cv_metrics{tag}.json"
     cv_path.write_text(json.dumps(cv_ci, indent=2))
 
-    model = fit(recs, cfg, causal, best_thr)
+    model = fit(recs, cfg, causal, best_thr, names=names)
     model.cv_report = {"step_auc": step_auc, "threshold": best_thr, "metrics_at_threshold": best,
                        "n_clips": len(recs), "folds": folds, "causal": causal}
-    out = out or run / f"stage1_model{'_causal' if causal else ''}.joblib"
+    out = out or run / f"stage1_model{tag}.joblib"
     joblib.dump(model, out)
     typer.echo(f"\nSaved model: {out.resolve()}")
     typer.echo(f"Saved cross-validated metrics (use for the report): {cv_path.resolve()}")

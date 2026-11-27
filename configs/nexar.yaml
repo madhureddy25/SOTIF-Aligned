@@ -8,3 +8,5 @@ mining:
   feature_weights:
     c.looming_rate: 0.3      # whole-frame looming: AUC 0.51 on Nexar v3 (noise); ego-path version replaces it
     o.saturation: 0.5        # AUC 0.66 but likely a day/scene confound between positives and negatives
+    c.term_norm: 0.0         # mid-frame vanishes: AUC 0.556 on 1,300 clips; as a hand-weighted rule it dropped the
+                             # combined score's AUC 0.716 -> 0.638, so rules ignore it (the learned model still uses it)
