@@ -129,3 +129,80 @@ def test_perception_cache_roundtrip(tmp_path, cfg):
     for a, b in zip(f1, f2, strict=True):
         for k in a:
             assert abs(a[k] - b[k]) < 0.05 + 0.02 * abs(a[k]), k
+
+
+def _vanish_log(last_seen: int, n: int = 100, lost_buffer: int = 30):
+    """A car mid-frame from frame 0 to `last_seen`, then gone. Like CMCSort, the tracker reports the
+    termination only `lost_buffer + 1` updates later, when the box is long out of the scorer's history."""
+    from sotif_miner.mining.runner import PerceptionLog
+    from sotif_miner.schemas import FrameRecord, TrackState
+
+    frames = []
+    for i in range(n):
+        tracks = [TrackState(track_id=7, frame=i, box=(300.0, 200.0, 360.0, 250.0), score=0.9, cls="car")] \
+            if i <= last_seen else []
+        term = [7] if i == last_seen + lost_buffer + 1 else []
+        frames.append(FrameRecord(frame=i, t=i / 10, detections=[], tracks=tracks, terminated_ids=term))
+    return PerceptionLog("v", 10.0, 640, 360, frames)
+
+
+def test_mid_frame_vanish_counted_at_last_sighting(cfg):
+    """Regression: the termination arrives ~3 s after the track was last seen, beyond the 2.5 s box
+    history, so mid-frame terminations were never counted (c.mid_terminations was 0 on all of Nexar)."""
+    from sotif_miner.mining.scorer import compute_features
+
+    feats, impl = compute_features(_vanish_log(last_seen=40), cfg)
+    hits = [f["t"] for f in feats if f["c.mid_terminations"] > 0]
+    assert hits, "mid-frame vanish was never counted"
+    assert all(3.9 <= t <= 4.1 for t in hits)  # attributed to the step where the car was last seen
+    assert any(7 in s for s in impl)
+
+
+def test_vanish_near_clip_end_still_counted(cfg):
+    """A track that vanishes in the last seconds (before the tracker would report it) still counts,
+    as long as the clip continues for at least 1 s after its last sighting."""
+    from sotif_miner.mining.scorer import compute_features
+
+    feats, _ = compute_features(_vanish_log(last_seen=85), cfg)
+    assert any(f["c.mid_terminations"] > 0 for f in feats)
+    feats, _ = compute_features(_vanish_log(last_seen=95), cfg)  # only 0.4 s left: not a vanish
+    assert not any(f["c.mid_terminations"] > 0 for f in feats)
+
+
+def _stretch_samples(peak_t: float = 12.0):
+    """40 s clip, scored every 0.5 s: active from 10 s to 30 s, with the single highest score early."""
+    from sotif_miner.schemas import SignalSample
+
+    out = []
+    for k in range(80):
+        t = k * 0.5
+        c = 1.0 if t == peak_t else (0.8 if 10.0 <= t <= 30.0 else 0.0)
+        out.append(SignalSample(t=t, frame=k * 5, continuity=c, combined=c))
+    return out
+
+
+def test_long_active_stretch_is_tiled_not_clamped_to_its_peak(cfg):
+    """Regression: a 20 s active stretch was cut to one 8 s window around its peak (12 s), so an event
+    at 28 s inside the same stretch was missed. This is why recall *fell* at very low thresholds."""
+    from sotif_miner.mining.scorer import slice_windows
+
+    s = _stretch_samples()
+    wins = slice_windows(s, [set() for _ in s], cfg, 10.0, 399, "x")
+    spans = [(w.start_frame / 10.0, w.end_frame / 10.0) for w in wins]
+    assert len(wins) >= 3
+    assert all(e - b <= cfg["mining"]["max_window_s"] + 0.1 for b, e in spans)
+    assert any(b <= 28.0 <= e for b, e in spans), spans   # the late part of the stretch is covered
+    assert any(b <= 12.0 <= e for b, e in spans), spans   # and so is the peak
+
+
+def test_long_stretch_split_can_be_disabled(cfg):
+    """`split_long_stretches: false` reproduces the old single-window behaviour (for old numbers)."""
+    import copy
+
+    from sotif_miner.mining.scorer import slice_windows
+
+    c = copy.deepcopy(cfg)
+    c["mining"]["split_long_stretches"] = False
+    s = _stretch_samples()
+    wins = slice_windows(s, [set() for _ in s], c, 10.0, 399, "x")
+    assert len(wins) == 1

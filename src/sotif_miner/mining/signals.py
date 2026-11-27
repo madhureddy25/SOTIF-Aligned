@@ -60,20 +60,44 @@ def uncertainty_signal(frames: list[FrameRecord], band=(0.25, 0.60)):
     return score, {"band_entropy": band_part, "flicker": flicker, "dropouts": float(dropouts), "score_std": std}, implicated
 
 
-def continuity_signal(frames: list[FrameRecord], prev_frames: list[FrameRecord], fps: float, w: int, h: int,
-                      looming_rate: float = 0.8):
-    """Mid-frame track terminations/births, reacquisition gaps, looming (TTC proxy)."""
-    last_box: dict[int, tuple] = {}
-    for f in prev_frames + frames:
+def vanish_events(frames: list[FrameRecord], fps: float, min_gap_s: float = 1.0) -> dict[int, list[tuple[int, tuple]]]:
+    """Tracks seen for the last time, keyed by the index of their last sighting: {index: [(id, last box)]}.
+
+    The tracker only reports a termination after its lost buffer (~3 s), which is too late to place
+    the event and lands outside the scorer's box history. A track that is never seen again, with at
+    least `min_gap_s` of clip left after its last sighting, vanished at that sighting.
+    """
+    last: dict[int, tuple[int, tuple]] = {}
+    for i, f in enumerate(frames):
         for t in f.tracks:
-            last_box[t.track_id] = t.box
+            last[t.track_id] = (i, t.box)
+    gap = max(1, int(round(min_gap_s * fps)))
+    out: dict[int, list[tuple[int, tuple]]] = {}
+    for tid, (i, box) in last.items():
+        if len(frames) - 1 - i >= gap:
+            out.setdefault(i, []).append((tid, box))
+    return out
+
+
+def continuity_signal(frames: list[FrameRecord], prev_frames: list[FrameRecord], fps: float, w: int, h: int,
+                      looming_rate: float = 0.8, vanished: list[tuple[int, tuple]] | None = None):
+    """Mid-frame track terminations/births, reacquisition gaps, looming (TTC proxy).
+
+    `vanished`: (track id, last box) of tracks last seen in `frames` (see `vanish_events`). Without it,
+    the tracker's delayed termination reports are used, which only works for short lost buffers.
+    """
+    if vanished is None:
+        last_box: dict[int, tuple] = {}
+        for f in prev_frames + frames:
+            for t in f.tracks:
+                last_box[t.track_id] = t.box
+        vanished = [(tid, last_box[tid]) for f in frames for tid in f.terminated_ids if tid in last_box]
     mid_term, mid_birth, implicated = 0, 0, set()
+    for tid, b in vanished:
+        if not _near_border(b, w, h):
+            mid_term += 1
+            implicated.add(tid)
     for f in frames:
-        for tid in f.terminated_ids:
-            b = last_box.get(tid)
-            if b is not None and not _near_border(b, w, h):
-                mid_term += 1
-                implicated.add(tid)
         for t in f.tracks:
             if t.is_new and not _near_border(t.box, w, h) and f.frame > 2:
                 area = (t.box[2] - t.box[0]) * (t.box[3] - t.box[1])

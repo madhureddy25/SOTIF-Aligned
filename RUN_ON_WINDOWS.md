@@ -164,6 +164,20 @@ sotif-miner nexar-eval --run runs\nexar_heldout --root D:\data\nexar --split tra
 ```
 Do not evaluate the retrained model on `runs\nexar_big_heldout`: it has now trained on those clips.
 
+## Re-feature after a feature fix (no detection re-run; CPU)
+Every mined clip caches its detections/tracks in `perception\*.json.gz`, so fixed or new feature code only
+needs `refeature` (writes a NEW run folder; the old one stays untouched), then retraining:
+```
+mkdir runs\model_1300
+copy runs\nexar_v4\stage1_model.joblib runs\model_1300\
+copy runs\nexar_v4\stage1_cv_metrics.json runs\model_1300\
+sotif-miner refeature --run runs\nexar_v4 --config configs\nexar.yaml --out runs\nexar_v5
+sotif-miner nexar-diagnose --run runs\nexar_v5
+sotif-miner train-stage1 --run runs\nexar_v5 --root D:\data\nexar
+```
+Compare the `train-stage1` output with `runs\model_1300\stage1_cv_metrics.json` (step AUC 0.851 before).
+Set `mining: {split_long_stretches: false}` in a config to reproduce the old single-window slicer.
+
 ## Phase 4 — closed loop (fine-tune the detector on mined failures, prove it helps)
 Label-free (runs with what you have). The honest proof is re-mining held-out clips, not pseudo-label AP.
 ```
