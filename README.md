@@ -18,18 +18,21 @@ headline number is reported with a confidence interval and an honest limitations
 
 ---
 
-## Headline result (real Nexar footage, held-out clips the model never saw)
+## Headline result (real Nexar footage, 1,100 held-out clips the model never saw)
 
 | Metric | Value | 95% CI |
 |---|---|---|
-| **Near-miss recall** | **0.91** | [0.85, 0.96] |
-| Flagged **before** the official alert time | 0.73 | — |
-| Median early-warning lead | 3.3 s | — |
-| Video discarded (compression) | 0.67 | [0.65, 0.69] |
-| False windows / minute (normal driving) | 3.1 | [2.8, 3.4] |
+| **Near-miss recall** | **0.88** | [0.86, 0.91] |
+| Flagged **before** the official alert time | 0.65 | [0.61, 0.69] |
+| Median early-warning lead | 3.1 s | [2.7, 3.4] |
+| Video discarded (compression) | 0.65 | [0.64, 0.66] |
+| False windows / minute (normal driving) | 3.2 | [3.1, 3.4] |
 | VLM root-cause JSON validity | 99.8% | — |
 
-Cross-validation predicted recall 0.90; the held-out test delivered 0.91 — **no overfitting.**
+The Stage-1 model was trained on 200 clips and tested on **1,100 disjoint clips** (550 near-miss / 550 normal).
+Cross-validation predicted recall 0.90, which sits inside the held-out 95% CI — **no overfitting.**
+An earlier 100-clip held-out test read 0.91 recall and 0.73 early recall; at 11× the sample size, early
+recall settles at 0.65 (the smaller test was optimistic), and we report the larger test.
 141 events were diagnosed and consolidated into **21 ranked failure modes**.
 
 ---
@@ -68,7 +71,7 @@ frame; the expensive vision-language reasoning runs **only** on verified anomaly
 
 | Stage | Does | Key tech | Status |
 |---|---|---|---|
-| ① Mining | Flag 4–8 s edge-case windows, discard routine video | RF-DETR · CMC-SORT · gradient boosting | ✅ validated (held-out recall 0.91) |
+| ① Mining | Flag 4–8 s edge-case windows, discard routine video | RF-DETR · CMC-SORT · gradient boosting | ✅ validated (recall 0.88 on 1,100 held-out clips) |
 | ② Evidence | Keyframes + zoomed ROI crops + telemetry | OpenCV · CLAHE | ✅ |
 | ③ Diagnosis | Describe + attribute root cause, critic-checked | Qwen3-VL (local) · deterministic rules | ✅ 99.8% valid JSON |
 | ④ Taxonomy | Cluster into ranked SOTIF-tagged failure modes | UMAP/PCA · HDBSCAN | ✅ 21 modes |
@@ -105,12 +108,15 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
 ## Design notes & honesty
 
 - **Licensing:** RF-DETR (Apache-2.0) over AGPL YOLO; local VLMs via Ollama; nothing copyleft in the path.
-- **What is validated:** mining recall *generalizes* (held-out ≈ cross-validated). Diagnosis is
+- **What is validated:** mining recall *generalizes* (1,100-clip held-out ≈ cross-validated). Diagnosis is
   reproducible and critic-checked. Taxonomy consolidates real recurring modes.
 - **What is *not* (and the report says so):** perception-failure causes aren't independently validated
   (Nexar has no detector-failure labels — that needs CARLA counterfactuals or human review); the
   domain is US/clear-day-heavy; this **mines** events in recorded video, it does **not predict** crashes
   before they are visible.
+- **Localizer, not a clip classifier:** 93% of normal-driving clips still get at least one window. The
+  value is in narrowing each clip to a few seconds (65% of video discarded, ~3 false windows/min), not in
+  declaring whole clips safe.
 
 ---
 

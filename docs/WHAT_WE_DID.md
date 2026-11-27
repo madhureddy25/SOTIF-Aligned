@@ -34,10 +34,11 @@ self-contained HTML report. Five decoupled stages:
 
 - Mined **200 clips**, diagnosed **141 events** → **99.8 % valid JSON** from the local 4B model, 1 failure in 416 calls.
 - Built a **21-mode failure taxonomy**, 100 events in recurring (Area 2) modes, 13 novel (Area 3).
-- **Held-out mining recall 0.91** (95 % CI 0.85–0.96) on 100 clips the model never saw — matching the
-  cross-validated 0.90, which proves the model **generalizes** (no overfitting).
-- Flags 73 % of near-misses **before** the official alert time, ~3.3 s median early warning, discards
-  67 % of video, at ~3.1 false windows/min on normal driving.
+- Mined the **full Nexar train split: all 1,500 clips** (200 to train Stage 1; 200 + 1,100 held out), ~46 s per clip on the 3050.
+- **Held-out mining recall 0.88** (95 % CI 0.86–0.91) on **1,100 clips** the model never saw (trained on
+  200) — the cross-validated 0.90 sits inside the CI, so the model **generalizes** (no overfitting).
+- Flags 65 % (CI 0.61–0.69) of near-misses **before** the official alert time, 3.1 s median early warning
+  (CI 2.7–3.4), discards 65 % of video, at 3.2 false windows/min (CI 3.1–3.4) on normal driving.
 
 ---
 
@@ -63,6 +64,12 @@ This is the part that makes the results credible — we did not paper over anyth
    expected and meaningless for mining. → Built the correct **held-out mining test** (re-mine unseen
    full-length clips), which gave the real 0.91, and relegated the anticipation AP to a labelled aside.
 
+5. **A small held-out test was optimistic.** The first held-out test (100 clips) read recall 0.91 and
+   early recall 0.73. Scaling the held-out set to 1,100 clips gave recall 0.88 (CIs overlap — consistent)
+   but early recall 0.65, with the old 0.73 *outside* the new CI. → We report the 1,100-clip numbers and
+   keep the 100-clip result only as history. It also surfaced that 93 % of normal clips get ≥1 window:
+   the miner localizes events within a clip rather than classifying clips, now stated in the limitations.
+
 Each fix is a separate commit with the evidence in its message.
 
 ---
@@ -80,7 +87,8 @@ Each fix is a separate commit with the evidence in its message.
 
 - **Phase 4 run:** the closed-loop machinery is built and tested, but a real *detection-accuracy* gain
   needs box labels Nexar lacks (CODA or BDD). The label-free path runs today and proves the mechanics.
-- **Scale:** used 200 of 1,500 training clips. More clips → tighter CIs.
+- **Scale:** all 1,500 train clips are mined, but the Stage-1 model is still trained on 200; retraining
+  on more clips (aimed at the clip-level false alarms) is the next step.
 - **Real-time / on-vehicle:** out of scope; this is an offline analysis and triage tool.
 - **Perception-failure causes** aren't independently validated (needs CARLA counterfactuals or human review).
 
