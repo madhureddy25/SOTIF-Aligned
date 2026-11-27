@@ -18,46 +18,46 @@ headline number is reported with a confidence interval and an honest limitations
 
 ---
 
-## Headline result (real Nexar footage, 1,100 held-out clips the model never saw)
+## Headline result (real Nexar footage)
 
-| Metric | Value | 95% CI |
+Current Stage-1 model: motion + **interaction cues**, trained on 1,300 clips.
+
+| Metric | Held-out: 200 clips never seen (95% CI) | 5-fold CV, 1,300 clips |
 |---|---|---|
-| **Near-miss recall** | **0.88** | [0.86, 0.91] |
-| Flagged **before** the official alert time | 0.65 | [0.61, 0.69] |
-| Median early-warning lead | 3.1 s | [2.7, 3.4] |
-| Video discarded (compression) | 0.65 | [0.64, 0.66] |
-| False windows / minute (normal driving) | 3.2 | [3.1, 3.4] |
+| **Near-miss recall** | **0.92** [0.87, 0.97] | 0.92 |
+| Flagged **before** the official alert time | 0.76 [0.68, 0.84] | 0.72 |
+| Median early-warning lead | 2.6 s [2.4, 3.2] | 2.6 s |
+| **False windows / minute** (normal driving) | **2.1** [1.8, 2.4] | 1.8 |
+| **Video discarded** (compression) | **0.75** [0.73, 0.77] | 0.77 |
+| Normal clips with ≥ 1 window | 0.78 | 0.72 |
+| Step-level AUC | — | **0.917** |
 | VLM root-cause JSON validity | 99.8% | — |
 
-The Stage-1 model was trained on 200 clips and tested on **1,100 disjoint clips** (550 near-miss / 550 normal).
-5-fold cross-validation on the 200 training clips predicted recall 0.90 [0.84, 0.95] and early recall
-0.67 [0.58, 0.76]; the 1,100-clip held-out test delivered 0.88 and 0.65 — both inside the CV intervals,
-so **no overfitting.** An earlier 100-clip held-out test read 0.91 / 0.73; the larger test shows that 0.73
-early recall was the outlier, so we report the 1,100-clip numbers.
+Interaction cues — the lead vehicle's proximity and closing rate, road users moving toward the ego path
+(camera motion removed), signed ego braking — lifted step AUC from **0.850 to 0.917** on the *same*
+re-featured clips (ablation: `train-stage1 --legacy-features`). At the same recall they cut false windows
+nearly in half and raise the video discarded from 62% to 77%. The price: warnings come ~0.5 s later.
 141 events were diagnosed and consolidated into **21 ranked failure modes**.
 
-### Does more training data help? (200 → 1,300 clips)
+### How we got here (the same 200 held-out clips throughout)
 
-We retrained Stage 1 on all 1,300 mined clips and re-tested on the **same 200 held-out clips** (100 near-miss /
-100 normal) that neither model saw:
+| Same held-out clips | Trained on 200 | Trained on 1,300 | + Stage-1 fixes | **+ interaction cues** |
+|---|---|---|---|---|
+| Recall | 0.91 [0.85, 0.96] | 0.91 [0.85, 0.96] | 0.95 [0.90, 0.99] | 0.92 [0.87, 0.97] |
+| Flagged before alert | 0.73 | 0.76 [0.67, 0.84] | 0.78 [0.69, 0.86] | 0.76 [0.68, 0.84] |
+| Median early-warning lead | 3.3 s | **4.2 s** [3.6, 5.2] | 3.5 s [2.7, 4.5] | 2.6 s [2.4, 3.2] |
+| False windows / minute | 3.1 [2.8, 3.4] | 3.4 [3.1, 3.8] | 3.8 [3.4, 4.2] | **2.1** [1.8, 2.4] |
+| Video discarded | 0.67 [0.65, 0.69] | 0.63 [0.61, 0.66] | 0.60 [0.58, 0.63] | **0.75** [0.73, 0.77] |
+| Step-level AUC (5-fold CV) | 0.855 | 0.851 | 0.850 | **0.917** |
 
-| Same held-out clips | Trained on 200 | Trained on 1,300 | 1,300 + Stage-1 fixes |
-|---|---|---|---|
-| Recall | 0.91 [0.85, 0.96] | 0.91 [0.85, 0.96] | 0.95 [0.90, 0.99] |
-| Flagged before alert | 0.73 | 0.76 [0.67, 0.84] | 0.78 [0.69, 0.86] |
-| Median early-warning lead | 3.3 s | **4.2 s** [3.6, 5.2] | 3.5 s [2.7, 4.5] |
-| False windows / minute | **3.1** [2.8, 3.4] | 3.4 [3.1, 3.8] | 3.8 [3.4, 4.2] |
-| Video discarded | **0.67** [0.65, 0.69] | 0.63 [0.61, 0.66] | 0.60 [0.58, 0.63] |
-| Step-level AUC (5-fold CV) | 0.855 | 0.851 | 0.850 |
+**Finding: Stage 1 was feature-limited, not data-limited.** 6.5× more data and two bug fixes
+([journal](docs/WHAT_WE_DID.md) #6–#8) all stayed on one trade-off curve (AUC ≈ 0.85): earlier warnings
+or fewer false windows, never both. A new *kind* of signal moved the curve itself (#9): on held-out clips,
+false windows fall from 3.8 to 2.1 per minute (non-overlapping CIs) at statistically unchanged recall.
 
-**Finding: Stage 1 is feature-limited, not data-limited.** 6.5× more data left the model's discrimination
-(AUC) unchanged; the retrained model sits at a different point on the *same* trade-off curve — earlier
-warnings, slightly more false windows. The next gain must come from better signals, not more clips.
-Cross-validation over all 1,300 clips agrees: recall 0.91 [0.89, 0.93], early recall 0.72 [0.68, 0.75],
-3.2 false windows/min, 63% of video discarded. Fixing two Stage-1 bugs ([journal](docs/WHAT_WE_DID.md) #7, #8) also left AUC at 0.850 —
-three independent changes, one ceiling. On the held-out clips the fixed model catches 95 of 100
-near-misses (vs 91), paid for with more windows (3.8/min, 60% discarded) — again a move along the same
-curve, and within the overlapping CIs of 100 clips.
+The 200-clip model was also tested on **1,100 further held-out clips** (recall 0.88 [0.86, 0.91], early
+recall 0.65), inside its cross-validated intervals — evidence that CV here predicts held-out performance.
+The current model trained on those clips, so they can no longer test it.
 
 ---
 
@@ -95,7 +95,7 @@ frame; the expensive vision-language reasoning runs **only** on verified anomaly
 
 | Stage | Does | Key tech | Status |
 |---|---|---|---|
-| ① Mining | Flag 4–8 s edge-case windows, discard routine video | RF-DETR · CMC-SORT · gradient boosting | ✅ validated (recall 0.88 on 1,100 held-out clips) |
+| ① Mining | Flag 4–8 s edge-case windows, discard routine video | RF-DETR · CMC-SORT · gradient boosting | ✅ validated (held-out recall 0.92 at 2.1 false windows/min) |
 | ② Evidence | Keyframes + zoomed ROI crops + telemetry | OpenCV · CLAHE | ✅ |
 | ③ Diagnosis | Describe + attribute root cause, critic-checked | Qwen3-VL (local) · deterministic rules | ✅ 99.8% valid JSON |
 | ④ Taxonomy | Cluster into ranked SOTIF-tagged failure modes | UMAP/PCA · HDBSCAN | ✅ 21 modes |
@@ -132,18 +132,22 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
 ## Design notes & honesty
 
 - **Licensing:** RF-DETR (Apache-2.0) over AGPL YOLO; local VLMs via Ollama; nothing copyleft in the path.
-- **What is validated:** mining recall *generalizes* (1,100-clip held-out ≈ cross-validated). Diagnosis is
+- **What is validated:** mining *generalizes* (held-out ≈ cross-validated, on 1,100 and on 200 clips). Diagnosis is
   reproducible and critic-checked. Taxonomy consolidates real recurring modes.
 - **What is *not* (and the report says so):** perception-failure causes aren't independently validated
   (Nexar has no detector-failure labels — that needs CARLA counterfactuals or human review); the
   domain is US/clear-day-heavy; this **mines** events in recorded video, it does **not predict** crashes
   before they are visible.
-- **Localizer, not a clip classifier:** 93% of normal-driving clips still get at least one window. The
-  value is in narrowing each clip to a few seconds (65% of video discarded, ~3 false windows/min), not in
-  declaring whole clips safe.
+- **Localizer, not a clip classifier:** 78% of normal-driving clips still get at least one window (down
+  from 93%). The value is in narrowing each clip to a few seconds (75% of video discarded, ~2 false
+  windows/min), not in declaring whole clips safe.
+- **Possible scene confound:** the strongest single cue is the lead vehicle's size (proximity, AUC 0.70).
+  Part of that may be that near-miss clips are filmed in denser, closer traffic rather than the cue timing
+  the event. Held-out clips come from the same distribution, so they cannot rule this out; a scene-matched
+  comparison (same light/weather/scene groups) is the planned check.
 - **High-recall mode:** the default threshold targets recall ≥ 0.9 with the most video discarded. For
-  "miss nothing" triage, threshold 0.2 reaches **0.98 recall (0.88 before the alert)** while still
-  discarding 38% of video (5-fold CV, 1,300 clips).
+  "miss nothing" triage, threshold 0.4 reaches **0.97 recall (0.83 before the alert)** while still
+  discarding 65% of video (5-fold CV, 1,300 clips).
 
 ---
 

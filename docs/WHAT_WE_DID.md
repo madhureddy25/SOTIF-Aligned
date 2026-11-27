@@ -34,6 +34,9 @@ self-contained HTML report. Five decoupled stages:
 
 - Mined **200 clips**, diagnosed **141 events** → **99.8 % valid JSON** from the local 4B model, 1 failure in 416 calls.
 - Built a **21-mode failure taxonomy**, 100 events in recurring (Area 2) modes, 13 novel (Area 3).
+- **Current Stage-1 model** (interaction cues, 1,300 clips): 5-fold CV AUC 0.917, recall 0.92 at 1.8 false
+  windows/min with 77% of video discarded; held-out (200 clips) recall 0.92 [0.87, 0.97], 2.1 [1.8, 2.4]
+  false windows/min, 75% discarded (see #9).
 - Retrained Stage 1 on **1,300 clips**: 5-fold CV recall 0.91 [0.89, 0.93], early recall 0.72 [0.68, 0.75];
   on the 200 untouched held-out clips recall 0.91 [0.85, 0.96], median lead 4.2 s — but AUC unchanged (see #6).
 - Mined the **full Nexar train split: all 1,500 clips** (200 to train Stage 1; 200 + 1,100 held out), ~46 s per clip on the 3050.
@@ -99,6 +102,18 @@ This is the part that makes the results credible — we did not paper over anyth
    recall 0.78, at 3.8 false windows/min and 60% discarded — more coverage for more windows, not a
    better curve (AUC 0.850).
 
+9. **Breaking the ceiling with a new kind of signal.** Every change so far stayed at AUC ≈ 0.85, and the
+   per-feature table showed the signal lived in motion. We added *interaction* cues computed from the
+   cached tracks (no detection re-run): the lead road user in the ego corridor (proximity, closing rate,
+   its change), road users moving toward the ego path with the camera's own motion removed, nearest VRU,
+   and signed ego braking. A clean ablation — same re-featured clips, trained with and without the cues
+   (`--legacy-features`) — gave AUC **0.850 → 0.917**; the legacy run reproduced the previous table
+   exactly. On the 200 untouched held-out clips: recall 0.92 [0.87, 0.97], false windows **3.8 → 2.1/min**
+   (non-overlapping CIs), video discarded **0.60 → 0.75**, at the cost of ~0.9 s less lead time.
+   Honest caveats: the top cue is lead-vehicle size (AUC 0.70), which may partly reflect denser traffic in
+   near-miss clips (a scene confound held-out clips cannot rule out); the VRU and ego-speed cues are ~0.50
+   on Nexar. The cues feed the learned model only, so the rule-based scorer is unchanged.
+
 Each fix is a separate commit with the evidence in its message.
 
 ---
@@ -116,10 +131,10 @@ Each fix is a separate commit with the evidence in its message.
 
 - **Phase 4 run:** the closed-loop machinery is built and tested, but a real *detection-accuracy* gain
   needs box labels Nexar lacks (CODA or BDD). The label-free path runs today and proves the mechanics.
-- **Better Stage-1 signals:** more data (200 → 1,300 clips) and two bug fixes all left AUC at ~0.85.
-  The motion features carry the signal (ego-path looming 0.64, inverse TTC 0.64, shake 0.61); image
-  quality and detector uncertainty are ~0.50 on Nexar. Fewer false alarms need a new kind of signal
-  (e.g. relative motion of the lead vehicle, lane-relative position), not more of the same.
+- **Scene-confound check:** compare cue AUCs within matched light/weather/scene groups, to separate
+  "this moment is dangerous" from "this kind of traffic is in near-miss clips".
+- **Lane-relative cues (Phase B):** lane position needs pixels the perception cache does not keep; a
+  decode-only pass (no detector) would add it. Worth it only if the confound check leaves headroom.
 - **Real-time / on-vehicle:** out of scope; this is an offline analysis and triage tool.
 - **Perception-failure causes** aren't independently validated (needs CARLA counterfactuals or human review).
 
