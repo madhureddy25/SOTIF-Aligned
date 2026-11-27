@@ -165,7 +165,9 @@ def diagnose(run: Path = typer.Option(..., help="Run folder from `nexar` or `min
              limit: int = typer.Option(0, help="Max clips to diagnose (0 = all)"),
              skip_vlm: bool = typer.Option(False, help="Only build evidence (pass A)"),
              skip_evidence: bool = typer.Option(False, help="Only run the VLM on existing evidence (pass B)"),
-             rebuild: bool = typer.Option(False, help="Delete existing evidence + cards first (after code changes)")):
+             rebuild: bool = typer.Option(False, help="Delete existing evidence + cards first (after code changes)"),
+             perception: Path | None = typer.Option(None, help="Run folder holding perception/*.json.gz, if not "
+                                                    "--run (e.g. a refeature/rescore output reusing nexar_v4's)")):
     """Stage 2+3: build evidence bundles (pass A, RF-DETR on crops) then diagnose with the VLM (pass B).
 
     The two passes run one after the other so RF-DETR and the VLM never share GPU memory."""
@@ -178,19 +180,19 @@ def diagnose(run: Path = typer.Option(..., help="Run folder from `nexar` or `min
         (run / "cards.jsonl").unlink(missing_ok=True)
         typer.echo("Removed previous evidence and cards.")
     if not skip_evidence:
-        _evidence_pass(run, ev_root, cfg, only, limit)
+        _evidence_pass(run, ev_root, cfg, only, limit, perception or run)
     if not skip_vlm:
         _vlm_pass(run, ev_root, cfg)
 
 
-def _evidence_pass(run: Path, ev_root: Path, cfg: dict, only: str, limit: int):
+def _evidence_pass(run: Path, ev_root: Path, cfg: dict, only: str, limit: int, perception_run: Path | None = None):
     from .evidence.bundle import build_bundle, select_keyframes
     from .io.video import native_fps, read_frames
     from .mining.runner import load_log
     from .perception.detector import build_detector
     from .schemas import CandidateWindow
 
-    todo = []
+    todo, missing = [], 0
     for f in sorted((run / "clips").glob("*.json")):
         rec = json.loads(f.read_text())
         if only == "positive" and not rec.get("positive"):
@@ -199,9 +201,14 @@ def _evidence_pass(run: Path, ev_root: Path, cfg: dict, only: str, limit: int):
             continue
         wins = sorted((CandidateWindow(**w) for w in rec["windows"]), key=lambda w: -w.peak_score)
         wins = wins[: cfg["diagnosis"]["max_windows_per_clip"]]
-        cache = run / "perception" / f"{rec['clip_id']}.json.gz"
+        cache = (perception_run or run) / "perception" / f"{rec['clip_id']}.json.gz"
+        if wins and not cache.exists():
+            missing += 1
         if wins and cache.exists() and rec.get("source"):
             todo.append((rec, wins, cache))
+    if missing:
+        typer.echo(f"Pass A: {missing} clips with windows have no perception cache under "
+                   f"{(perception_run or run) / 'perception'} and are skipped (use --perception <run>).")
     todo = todo[:limit] if limit else todo
     pending = [(r, w, c) for r, ws, c in todo for w in ws if not (ev_root / w.clip_id / "evidence.json").exists()]
     if not pending:
@@ -509,7 +516,12 @@ def train_stage1(run: Path = typer.Option(..., help="Nexar run folder with store
                  threshold: float | None = typer.Option(None, help="Use this threshold instead of the automatic choice"),
                  out: Path | None = typer.Option(None, help="Model file (default <run>/stage1_model[_causal].joblib)"),
                  legacy_features: bool = typer.Option(False, help="Train on the pre-interaction feature set "
-                                                      "(ablation: compare with/without the l.*/x.* cues)")):
+                                                      "(ablation: compare with/without the l.*/x.* cues)"),
+                 drop: str = typer.Option("", help="Comma list of features to leave out; 'x.*' = prefix, "
+                                          "'markers' = the clip markers from the confound check"),
+                 no_raw: bool = typer.Option(False, help="Z-scores only: no absolute feature levels, so the "
+                                             "model sees only change within each clip"),
+                 tag: str = typer.Option("", help="Suffix for the output files (default: derived from the options)")):
     """Train the learned Stage 1 scorer; report clip-grouped cross-validated metrics per threshold."""
     import copy
 
@@ -518,7 +530,15 @@ def train_stage1(run: Path = typer.Option(..., help="Nexar run folder with store
 
     from .datasets.nexar import load_nexar
     from .eval.nexar_eval import ClipResult, _auc, evaluate_train
-    from .mining.learned import LEGACY_NAMES, NAMES, cross_validate, fit, learned_samples, step_labels
+    from .mining.learned import (
+        LEGACY_NAMES,
+        NAMES,
+        cross_validate,
+        fit,
+        learned_samples,
+        select_names,
+        step_labels,
+    )
     from .mining.scorer import slice_windows
 
     cfg = load_config(config)
@@ -530,8 +550,12 @@ def train_stage1(run: Path = typer.Option(..., help="Nexar run folder with store
     typer.echo(f"{len(recs)} clips ({sum(bool(r['positive']) for r in recs)} positive); "
                f"{'causal' if causal else 'offline (+-2 s context)'}; {folds}-fold CV grouped by clip ...")
     names = LEGACY_NAMES if legacy_features else NAMES
-    typer.echo(f"{len(names)} features ({'legacy set' if legacy_features else 'full set'})")
-    oof = cross_validate(recs, cfg, causal, folds, names=names)
+    if drop:
+        names = [n for n in names if n in set(select_names(drop))]
+    raw_levels = not no_raw
+    typer.echo(f"{len(names)} features ({'legacy set' if legacy_features else 'full set'}"
+               f"{', dropped: ' + drop if drop else ''}{', z-scores only' if no_raw else ''})")
+    oof = cross_validate(recs, cfg, causal, folds, names=names, raw_levels=raw_levels)
 
     pe, pn = [], []
     for r in recs:
@@ -596,12 +620,16 @@ def train_stage1(run: Path = typer.Option(..., help="Nexar run folder with store
     cv_ci = bootstrap_train(oof_results, ("recall", "early_recall_before_alert", "median_lead_time_s",
                                           "negative_windows_per_minute", "compression"), n=1000)
     cv_ci["_meta"] = {"kind": "cross_validated_out_of_fold", "threshold": best_thr, "folds": folds,
-                      "n_clips": len(recs), "step_auc": step_auc, "causal": causal, "n_features": len(names)}
-    tag = ("_causal" if causal else "") + ("_legacy" if legacy_features else "")
+                      "n_clips": len(recs), "step_auc": step_auc, "causal": causal, "n_features": len(names),
+                      "dropped": drop, "raw_levels": raw_levels}
+    if not tag:
+        tag = "_".join(x for x in ("legacy" if legacy_features else "", "drop" if drop else "",
+                                   "zonly" if no_raw else "") if x)
+    tag = ("_causal" if causal else "") + (f"_{tag.lstrip('_')}" if tag else "")
     cv_path = run / f"stage1_cv_metrics{tag}.json"
     cv_path.write_text(json.dumps(cv_ci, indent=2))
 
-    model = fit(recs, cfg, causal, best_thr, names=names)
+    model = fit(recs, cfg, causal, best_thr, names=names, raw_levels=raw_levels)
     model.cv_report = {"step_auc": step_auc, "threshold": best_thr, "metrics_at_threshold": best,
                        "n_clips": len(recs), "folds": folds, "causal": causal}
     out = out or run / f"stage1_model{tag}.joblib"

@@ -77,6 +77,79 @@ def test_cross_validated_model_learns_signal(cfg):
     assert m.offsets == [-4, -2, 0] and m.predict_steps(recs[0]["features"], cfg).shape == (80,)
 
 
+def _fake_nexar(tmp_path, recs):
+    """A Nexar root (tiny videos + metadata.csv) and a run folder holding `recs` as mined clips."""
+    root = tmp_path / "nexar"
+    for lab in ("positive", "negative"):
+        d = root / "train" / lab
+        d.mkdir(parents=True)
+        rows = []
+        for r in recs:
+            if r["positive"] != (lab == "positive"):
+                continue
+            fn = r["clip_id"].split("_")[-1] + ".mp4"
+            vw = cv2.VideoWriter(str(d / fn), cv2.VideoWriter_fourcc(*"mp4v"), 10, (32, 24))
+            vw.write(np.zeros((24, 32, 3), np.uint8))
+            vw.release()
+            rows.append(f"{fn},{r['event_s'] or ''},{r['alert_s'] or ''},Normal,Clear,Urban,\n")
+        (d / "metadata.csv").write_text(HEADER + "".join(rows))
+    run = tmp_path / "run"
+    (run / "clips").mkdir(parents=True)
+    for r in recs:
+        (run / "clips" / f"{r['clip_id']}.json").write_text(json.dumps({**r, "windows": [], "samples": []}))
+    return root, run
+
+
+def test_cli_drop_markers_zscores_only(tmp_path):
+    """--drop markers --no-raw trains without the clip markers or absolute levels, saves to its own files,
+    and the saved model re-applies with the same design (no shape mismatch)."""
+    import joblib
+    from typer.testing import CliRunner
+
+    from sotif_miner.cli import app
+    from sotif_miner.mining.learned import CLIP_MARKERS
+
+    root, run = _fake_nexar(tmp_path, _recs(8, 8))
+    res = CliRunner().invoke(app, ["train-stage1", "--run", str(run), "--root", str(root), "--folds", "4",
+                                   "--drop", "markers", "--no-raw"])
+    assert res.exit_code == 0, res.output
+    assert "dropped: markers" in res.output and "z-scores only" in res.output
+    model = joblib.load(run / "stage1_model_drop_zonly.joblib")
+    assert model.raw is False and not set(CLIP_MARKERS) & set(model.names)
+    meta = json.loads((run / "stage1_cv_metrics_drop_zonly.json").read_text())["_meta"]
+    assert meta["raw_levels"] is False and meta["dropped"] == "markers"
+    assert not (run / "stage1_model.joblib").exists()  # did not overwrite the main model
+    res = CliRunner().invoke(app, ["rescore", "--run", str(run), "--model", str(run / "stage1_model_drop_zonly.joblib"),
+                                   "--out", str(tmp_path / "applied")])
+    assert res.exit_code == 0 and "Re-scored 16 clips" in res.output, res.output
+
+
+def test_select_names():
+    import pytest
+
+    from sotif_miner.mining.learned import CLIP_MARKERS, NAMES, select_names
+
+    assert set(select_names("markers")) == set(NAMES) - set(CLIP_MARKERS)
+    assert not any(n.startswith("x.") for n in select_names("x.*"))
+    assert "e.shake" not in select_names("e.shake, markers")
+    with pytest.raises(ValueError):
+        select_names("no.such_feature")
+
+
+def test_cli_confound(tmp_path):
+    from typer.testing import CliRunner
+
+    from sotif_miner.cli import app
+
+    root, run = _fake_nexar(tmp_path, _recs(8, 8))
+    res = CliRunner().invoke(app, ["confound", "--run", str(run), "--root", str(root),
+                                   "--out-json", str(tmp_path / "c.json")])
+    assert res.exit_code == 0, res.output
+    rows = {d["feature"]: d for d in json.loads((tmp_path / "c.json").read_text())["rows"]}
+    assert rows["c.ego_looming"]["within_clip"] > 0.7      # the synthetic spike is event-timed (partial overlap)
+    assert "1 light/weather/scene groups" in res.output
+
+
 def test_cli_train_and_apply(tmp_path, cfg):
     from typer.testing import CliRunner
 
