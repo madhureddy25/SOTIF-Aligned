@@ -206,6 +206,17 @@ sotif-miner nexar-eval --run runs\nexar_heldout_v6 --root D:\data\nexar --split 
 ```
 Models trained before these cues still load and predict (they keep their own feature list).
 
+## Confound check: does a cue time the event, or mark the kind of clip?
+Seconds, on stored features. Compares each cue's pooled AUC with AUCs computed only *within* strata:
+the same clip (event moment vs. its own quiet moments), the same light/weather/scene labels, and the same
+traffic-density tertile. A cue near 0.5 "within" clips marks the clip, not the moment.
+```
+sotif-miner confound --run runs\nexar_v6 --root D:\data\nexar --out-json runs\confound_v6.json
+sotif-miner confound --run runs\nexar_heldout_v6 --root D:\data\nexar
+```
+On a model-rescored run, `score.combined` is the learned model's probability; use the held-out run for it
+(on training clips it would be in-sample).
+
 ## Phase 4 — closed loop (fine-tune the detector on mined failures, prove it helps)
 Label-free (runs with what you have). The honest proof is re-mining held-out clips, not pseudo-label AP.
 ```

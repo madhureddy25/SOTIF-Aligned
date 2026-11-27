@@ -666,6 +666,30 @@ def nexar_diagnose(run: Path = typer.Option(..., help="Nexar run folder"),
         typer.echo(f"{name:24s} {auc:6.3f} {me:11.3f} {mn:12.3f}")
 
 
+@app.command("confound")
+def confound_cmd(run: Path = typer.Option(..., help="Nexar run folder (train split, with stored features)"),
+                 root: Path = typer.Option(..., help="Nexar dataset root (for light/weather/scene labels)"),
+                 top: int = typer.Option(25, help="Show the N features furthest from AUC 0.5 (0 = all)"),
+                 out_json: Path | None = typer.Option(None, help="Also write the full table as JSON")):
+    """Does each cue time the event, or mark the kind of clip events happen in? (pooled vs. stratified AUC)"""
+    from .datasets.nexar import load_nexar
+    from .eval.confound import confound_table
+
+    meta = {c.clip_id: (c.light, c.weather, c.scene) for c in load_nexar(root, "train")}
+    recs = [json.loads(f.read_text()) for f in sorted((run / "clips").glob("*.json"))]
+    rows, counts = confound_table(recs, meta)
+    typer.echo(f"within-clip: {counts.get('within_clip_clips', 0)} positive clips; scene-matched: "
+               f"{counts.get('scene_strata', 0)} light/weather/scene groups; traffic-matched: "
+               f"{counts.get('traffic_strata', 0)} density tertiles")
+    typer.echo(f"{'feature':20s} {'pooled':>7s} {'within':>7s} {'scene':>7s} {'traffic':>8s}   "
+               "(within ~0.5 = clip marker, not event timing)")
+    for d in rows[:top or None]:
+        typer.echo(f"{d['feature']:20s} {d['pooled']:7.3f} {d['within_clip']:7.3f} {d['scene_matched']:7.3f} "
+                   f"{d['traffic_matched']:8.3f}")
+    if out_json:
+        out_json.write_text(json.dumps({"counts": counts, "rows": rows}, indent=2))
+
+
 @app.command("nexar-eval")
 def nexar_eval(run: Path = typer.Option(..., help="Folder written by `sotif-miner nexar`"),
                root: Path = typer.Option(..., help="Nexar dataset root"),
