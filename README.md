@@ -149,7 +149,10 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
   Individual cues differ: lead-vehicle size drops from 0.70 pooled to 0.61 within clips (0.56 held-out),
   so it is partly a clip marker (closer traffic in near-miss clips); corridor occupancy, active tracks
   and glare fall to ~0.50 within clips — pure clip markers. Ego-motion jerks *rise* to 0.71–0.80 within
-  clips: the driver's reaction times the event but varies a lot between drivers.
+  clips: the driver's reaction times the event but varies a lot between drivers. Training without the
+  clip-marker inputs changes nothing (AUC 0.917 both; held-out 2.3 vs 2.1 false windows/min, overlapping
+  CIs), so the model does not lean on them; removing absolute levels instead nearly doubles false windows
+  (journal #11).
 - **High-recall mode:** the default threshold targets recall ≥ 0.9 with the most video discarded. For
   "miss nothing" triage, threshold 0.4 reaches **0.97 recall (0.83 before the alert)** while still
   discarding 65% of video (5-fold CV, 1,300 clips).
