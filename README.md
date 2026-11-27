@@ -132,7 +132,8 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
 ## Design notes & honesty
 
 - **Licensing:** RF-DETR (Apache-2.0) over AGPL YOLO; local VLMs via Ollama; nothing copyleft in the path.
-- **What is validated:** mining *generalizes* (held-out ≈ cross-validated, on 1,100 and on 200 clips). Diagnosis is
+- **What is validated:** mining *generalizes* (held-out ≈ cross-validated, on 1,100 and on 200 clips) and
+  *times the event* rather than the clip type (within-clip AUC 0.938 on held-out clips). Diagnosis is
   reproducible and critic-checked. Taxonomy consolidates real recurring modes.
 - **What is *not* (and the report says so):** perception-failure causes aren't independently validated
   (Nexar has no detector-failure labels — that needs CARLA counterfactuals or human review); the
@@ -141,10 +142,14 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
 - **Localizer, not a clip classifier:** 78% of normal-driving clips still get at least one window (down
   from 93%). The value is in narrowing each clip to a few seconds (75% of video discarded, ~2 false
   windows/min), not in declaring whole clips safe.
-- **Possible scene confound:** the strongest single cue is the lead vehicle's size (proximity, AUC 0.70).
-  Part of that may be that near-miss clips are filmed in denser, closer traffic rather than the cue timing
-  the event. Held-out clips come from the same distribution, so they cannot rule this out; a scene-matched
-  comparison (same light/weather/scene groups) is the planned check.
+- **Confound check (passed for the model, partial for one cue):** `sotif-miner confound` recomputes AUC
+  only *within* strata. On the 200 held-out clips the model's score is **0.938 within the same clip**
+  (event moment vs. that clip's quiet moments), 0.912 scene-matched and 0.911 traffic-matched, vs. 0.913
+  pooled — it times the event; scene, traffic and anything else constant per clip do not explain it.
+  Individual cues differ: lead-vehicle size drops from 0.70 pooled to 0.61 within clips (0.56 held-out),
+  so it is partly a clip marker (closer traffic in near-miss clips); corridor occupancy, active tracks
+  and glare fall to ~0.50 within clips — pure clip markers. Ego-motion jerks *rise* to 0.71–0.80 within
+  clips: the driver's reaction times the event but varies a lot between drivers.
 - **High-recall mode:** the default threshold targets recall ≥ 0.9 with the most video discarded. For
   "miss nothing" triage, threshold 0.4 reaches **0.97 recall (0.83 before the alert)** while still
   discarding 65% of video (5-fold CV, 1,300 clips).
