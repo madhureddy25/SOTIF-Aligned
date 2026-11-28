@@ -127,6 +127,7 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
 
 - 📋 **[What we built — project journal](docs/WHAT_WE_DID.md)** — everything done, and the honest failures we caught and fixed.
 - 🗂️ **[Full build plan](docs/PLAN.md)**
+- 📦 **[Results snapshot](results/README.md)** — trained models, all metrics with CIs, diagnosis cards and the taxonomy.
 
 ---
 
