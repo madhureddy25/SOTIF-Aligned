@@ -718,6 +718,50 @@ def confound_cmd(run: Path = typer.Option(..., help="Nexar run folder (train spl
         out_json.write_text(json.dumps({"counts": counts, "rows": rows}, indent=2))
 
 
+@app.command("autoresearch-eval")
+def autoresearch_eval(
+        run: Path = typer.Option(..., help="Training run with stored features (e.g. runs\\nexar_v6)"),
+        perception: Path = typer.Option(..., help="Run holding perception/*.json.gz (e.g. runs\\nexar_v4)"),
+        root: Path = typer.Option(..., help="Nexar dataset root"),
+        heldout: Path = typer.Option(Path("runs/nexar_heldout"), help="Held-out run: refused if any clip leaks in"),
+        state: Path = typer.Option(Path("autoresearch/state"), help="Git-ignored loop state (results.tsv, best.json)"),
+        desc: str = typer.Option("", help="One line: what this experiment changed"),
+        config: Path | None = typer.Option(None, help="Override YAML"),
+        seeds: int = typer.Option(3, help="Fold/seed draws (noise estimate)"),
+        workers: int = typer.Option(0, help="Processes for the experimental cues (0 = all cores)"),
+        tests: bool = typer.Option(True, help="Run the fast guard tests first")):
+    """Referee for the autoresearch loop: score mining/experimental.py, decide KEEP/DISCARD, log it."""
+    from .eval.autoresearch import decide, evaluate, git_commit, record, run_tests
+
+    repo = Path(__file__).resolve().parents[2]
+    commit = git_commit(repo)
+    best_path = state / "best.json"
+    best = json.loads(best_path.read_text()) if best_path.exists() else None
+    if tests:
+        ok, tail = run_tests(repo)
+        if not ok:
+            record(state, commit, None, "CRASH", f"guard tests failed: {tail}", desc)
+            typer.echo(f"VERDICT: CRASH (guard tests failed: {tail})")
+            raise typer.Exit(1)
+    try:
+        r = evaluate(run, perception, root, load_config(config), tuple(range(seeds)), workers=workers,
+                     heldout=heldout, log=typer.echo)
+    except Exception as e:  # noqa: BLE001 - a broken experiment is logged as a crash, not a traceback
+        record(state, commit, None, "CRASH", f"{type(e).__name__}: {e}", desc)
+        typer.echo(f"VERDICT: CRASH ({type(e).__name__}: {e})")
+        raise typer.Exit(1) from e
+    verdict, reason = decide(best, r)
+    record(state, commit, r, verdict, reason, desc)
+    typer.echo("---")
+    for k in ("auc_mean", "auc_std", "fw_per_min", "recall", "early_recall", "compression", "within_clip_auc",
+              "threshold", "n_features", "seconds"):
+        typer.echo(f"{k}: {r[k]:.4f}" if isinstance(r[k], float) else f"{k}: {r[k]}")
+    if best:
+        typer.echo(f"best_so_far: auc {best['auc_mean']:.4f} fw/min {best['fw_per_min']:.2f} "
+                   f"within {best['within_clip_auc']:.3f} ({best.get('commit')})")
+    typer.echo(f"VERDICT: {verdict} ({reason})")
+
+
 @app.command("audit-false-alarms")
 def audit_false_alarms(run: Path = typer.Option(..., help="Rescored held-out run (clips/*.json + source videos)"),
                        config: Path | None = typer.Option(None, help="Override YAML (vlm backend/model)"),

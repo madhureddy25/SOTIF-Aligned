@@ -279,6 +279,37 @@ Decision rules (set before reviewing): near-miss controls recognised < 70 % -> t
 flagged vs unflagged close-call rates (Fisher test) -> does the model find real close calls above the base rate;
 "adjacent lane" in >= 30 % of flagged non-conflicts -> build lane-relative cues (corridor fix first).
 
+## autoresearch: the Karpathy loop on Stage 1 (unattended)
+An agent edits one file (`src/sotif_miner/mining/experimental.py`), runs one fixed experiment, and keeps or reverts
+the change with git, round after round. The referee `sotif-miner autoresearch-eval` measures (5-fold CV AUC over 3
+fold/seed draws, false windows/min at recall >= 0.9, within-clip AUC), decides KEEP/DISCARD and logs to
+`autoresearch/state/` (git-ignored). Seven roles in `.claude/agents/` (planner, feature-engineer, runner, evaluator,
+auditor, analyst, scribe); `.claude/settings.json` allows only the commands and the one file the loop needs and
+denies reading the held-out run. Instructions: `autoresearch/program.md`. One round takes roughly 10-15 min.
+
+Needs Claude Code on this PC (where the GPU and data are), started from the repo folder:
+```
+cd D:\work\SOTIF-Aligned
+claude
+```
+then type: `Read autoresearch/program.md and run the loop. Tag: nov29.`
+Check the referee alone first (baseline, ~10-15 min):
+```
+mkdir autoresearch\state
+sotif-miner autoresearch-eval --run D:/work/sotif-miner/runs/nexar_v6 --perception D:/work/sotif-miner/runs/nexar_v4 --root D:/data/nexar --heldout D:/work/sotif-miner/runs/nexar_heldout --desc baseline
+```
+
+### autoresearch: final held-out check (once, by the human, after the loop)
+Re-feature with the kept cues, retrain the recommended model, and score the untouched held-out clips once:
+```
+sotif-miner refeature --run runs\nexar_v4 --config configs\nexar.yaml --out runs\nexar_v7
+sotif-miner train-stage1 --run runs\nexar_v7 --root D:\data\nexar --drop markers
+sotif-miner refeature --run runs\nexar_heldout --config configs\nexar.yaml --out runs\nexar_heldout_v7
+sotif-miner rescore --run runs\nexar_heldout_v7 --model runs\nexar_v7\stage1_model_drop.joblib
+sotif-miner nexar-eval --run runs\nexar_heldout_v7 --root D:\data\nexar --split train --bootstrap 2000 --metrics-kind held_out --out-metrics runs\heldout_v7_ci.json
+```
+Compare with `runs\heldout_v6_drop_ci.json` (recall 0.92, 2.3 false windows/min, 0.74 discarded).
+
 ## Phase 4 — closed loop (fine-tune the detector on mined failures, prove it helps)
 Label-free (runs with what you have). The honest proof is re-mining held-out clips, not pseudo-label AP.
 ```

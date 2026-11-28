@@ -52,7 +52,7 @@ def select_names(drop: str) -> list[str]:
     return out
 
 
-LEGACY_NAMES = [n for n in NAMES if not (n[:2] in ("l.", "x.") or n in ("e.speed", "e.decel", "e.pitch_dir"))]
+LEGACY_NAMES = [n for n in NAMES if not (n[:2] in ("l.", "x.", "z.") or n in ("e.speed", "e.decel", "e.pitch_dir"))]
 
 
 @dataclass
@@ -178,7 +178,11 @@ def cross_validate(recs: list[dict], cfg: dict, causal: bool = False, folds: int
     clip_idx = np.arange(len(recs))
     strata = np.array([1 if r.get("positive") else 0 for r in recs])
     # interleave positives/negatives so every fold has both
-    order = np.concatenate([clip_idx[strata == 1], clip_idx[strata == 0]])
+    pos_idx, neg_idx = clip_idx[strata == 1], clip_idx[strata == 0]
+    if seed:  # a different fold assignment per seed (seed 0 = the original, deterministic one)
+        rng = np.random.default_rng(seed)
+        pos_idx, neg_idx = rng.permutation(pos_idx), rng.permutation(neg_idx)
+    order = np.concatenate([pos_idx, neg_idx])
     fold_of = np.empty(len(recs), dtype=int)
     fold_of[order] = np.arange(len(order)) % folds
     oof: dict[str, np.ndarray] = {}

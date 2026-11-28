@@ -27,6 +27,7 @@ from collections import Counter
 import numpy as np
 
 from ..schemas import CandidateWindow, SignalSample
+from .experimental import EXP_FEATURES
 from .runner import PerceptionLog
 from .signals import (
     continuity_signal,
@@ -76,7 +77,33 @@ FEATURES: dict[str, tuple[str, int, float]] = {
 }
 # Features the hand-weighted rule scorer ignores (the learned model reads all of FEATURES). A weak cue
 # added to the rules as an equal max-pooled vote drags the combined score down (c.term_norm, journal #7).
-LEARNED_ONLY = {n for n in FEATURES if n[:2] in ("l.", "x.")} | {"e.speed", "e.decel", "e.pitch_dir"}
+# Experimental cues under test by the autoresearch loop (mining/experimental.py); always learned-only.
+if any(not n.startswith("z.") for n in EXP_FEATURES):
+    raise ValueError("experimental feature names must start with 'z.'")
+FEATURES.update(EXP_FEATURES)
+LEARNED_ONLY = ({n for n in FEATURES if n[:2] in ("l.", "x.", "z.")} | {"e.speed", "e.decel", "e.pitch_dir"})
+
+
+def iter_steps(log: PerceptionLog, cfg: dict):
+    """(step index, the step's frames, the ~2 s of frames before it) for every 0.5 s step of a log."""
+    if log.single_frame:
+        for k, f in enumerate(log.frames):
+            yield k, [f], []
+        return
+    step = max(1, int(round(cfg["mining"]["step_s"] * log.fps)))
+    for k in range(int(np.ceil(len(log.frames) / step))):
+        fr = log.frames[k * step:(k + 1) * step]
+        if not fr:
+            break
+        yield k, fr, log.frames[max(0, (k - 4) * step):k * step]
+
+
+def experimental_step(fr, prev, log: PerceptionLog) -> dict[str, float]:
+    """The autoresearch cues for one step: every EXP_FEATURES name, as float (missing -> 0.0)."""
+    from . import experimental
+
+    out = experimental.extra_features(fr, prev, log.fps, log.width, log.height)
+    return {n: float(out.get(n, 0.0)) for n in EXP_FEATURES}
 
 
 def compute_features(log: PerceptionLog, cfg: dict, corpus: np.ndarray | None = None
@@ -95,11 +122,7 @@ def compute_features(log: PerceptionLog, cfg: dict, corpus: np.ndarray | None = 
 
     vanish = {} if log.single_frame else vanish_events(log.frames, log.fps)
     feats, implicated = [], []
-    for k in range(n_steps):
-        fr = log.frames[k * step:(k + 1) * step]
-        if not fr:
-            break
-        prev = log.frames[max(0, (k - 4) * step):k * step]
+    for k, fr, prev in iter_steps(log, cfg):
         _, ud, ui = uncertainty_signal(fr, tuple(m["uncertainty_band"]))
         if log.single_frame:
             cd, ci = {}, set()
@@ -115,6 +138,8 @@ def compute_features(log: PerceptionLog, cfg: dict, corpus: np.ndarray | None = 
         f.update({f"o.{a}": float(b) for a, b in od.items()})
         f.update({f"e.{a}": float(b) for a, b in ed.items()})
         f.update({k: float(v) for k, v in sd.items()})
+        if EXP_FEATURES and not log.single_frame:
+            f.update(experimental_step(fr, prev, log))
         feats.append(f)
         implicated.append(ui | ci | si)
     return feats, implicated
