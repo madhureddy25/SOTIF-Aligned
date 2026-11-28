@@ -32,8 +32,12 @@ self-contained HTML report. Five decoupled stages:
 
 ## What we actually measured (real Nexar footage, your GPU)
 
-- Mined **200 clips**, diagnosed **141 events** → **99.8 % valid JSON** from the local 4B model, 1 failure in 416 calls.
-- Built a **21-mode failure taxonomy**, 100 events in recurring (Area 2) modes, 13 novel (Area 3).
+- **Diagnosed all 650 near-miss clips**: 1,142 windows, 3,360 VLM calls, **99.97 % valid JSON** on the first try
+  (1 retry, 0 failures), 1,121 accepted / 21 needs-review, 10.2 s per call (~10 h on the 3050).
+- **Failure taxonomy: 856 events → 56 modes** (35 recurring, 21 singletons); 832 events (97 %) in recurring
+  Area 2 modes, 24 in Area 3. Top modes: daytime (246) and night (139) closing conflicts with cars, daytime
+  truck conflicts (41), occluded-actor emergence (36 day, 33 night), perception blind spots (34 day, 24 night).
+  (First pass, 200 clips: 141 events → 21 modes, 99.8 % valid JSON.)
 - **Confound check:** the model's held-out score is 0.938 AUC *within the same clip* — it times the event,
   not the clip type (see #10).
 - **Current Stage-1 model** (interaction cues, 1,300 clips): 5-fold CV AUC 0.917, recall 0.92 at 1.8 false
@@ -156,6 +160,16 @@ This is the part that makes the results credible — we did not paper over anyth
     650 near-miss clips (~1,100 windows) take ~9-10 h on the 3050; two diagnoses sharing the GPU slowed
     calls to 22 s.
 
+13. **Diagnosis and taxonomy at full scale.** All 650 near-miss clips: 1,142 windows, 3,360 VLM calls,
+    99.97 % valid JSON, 21 cards (1.8 %) left for review. The 286 INCONCLUSIVE cards (25 %) are mostly the
+    second window of a clip that holds one event. The other 856 form 56 modes (35 recurring); 45 % of all
+    events sit in two modes — closing conflicts with a car by day (246) and night (139) — which is what
+    Nexar, a collision dataset, should look like. Scale also confirms #12: the label mix on near-miss
+    windows (54 / 25 / 10 / 9 / 2 %) is the same as on false alarms (55 / 24 / 9 / 8 / 3 %), so the taxonomy
+    describes the *triggers* the miner reacts to, not independently verified failures. Area 2 share rose
+    from 71 % (100/141) to 97 % (832/856): with more events, more of them recur — Area 2 here means
+    "recurs in this corpus", not "known to the standard".
+
 Each fix is a separate commit with the evidence in its message.
 
 ---
@@ -176,8 +190,8 @@ Each fix is a separate commit with the evidence in its message.
 - **Human review of false alarms:** clip markers and absolute levels are ruled out as their cause (#11),
   and diagnosis cannot separate them from events (#12). Label ~30 false-alarm windows by eye (real close
   call / normal driving) to estimate label noise in Nexar's normal clips.
-- **Full-split taxonomy:** re-run the taxonomy once all ~1,100 near-miss windows are diagnosed (the
-  current 141-card run used a partial diagnosis).
+- **Independent root-cause check:** the taxonomy groups *why windows fired* (#12, #13); validating causes
+  needs labels the rules do not read — human review or CARLA counterfactuals.
 - **Lane-relative cues (Phase B):** lane position needs pixels the perception cache does not keep; a
   decode-only pass (no detector) would add it. Worth it only if the confound check leaves headroom.
 - **Real-time / on-vehicle:** out of scope; this is an offline analysis and triage tool.

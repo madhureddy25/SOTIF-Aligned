@@ -31,13 +31,14 @@ Current Stage-1 model: motion + **interaction cues**, trained on 1,300 clips.
 | **Video discarded** (compression) | **0.75** [0.73, 0.77] | 0.77 |
 | Normal clips with ≥ 1 window | 0.78 | 0.72 |
 | Step-level AUC | — | **0.917** |
-| VLM root-cause JSON validity | 99.8% | — |
+| VLM root-cause JSON validity (3,360 calls) | 99.97% | — |
 
 Interaction cues — the lead vehicle's proximity and closing rate, road users moving toward the ego path
 (camera motion removed), signed ego braking — lifted step AUC from **0.850 to 0.917** on the *same*
 re-featured clips (ablation: `train-stage1 --legacy-features`). At the same recall they cut false windows
 nearly in half and raise the video discarded from 62% to 77%. The price: warnings come ~0.5 s later.
-141 events were diagnosed and consolidated into **21 ranked failure modes**.
+1,142 windows from all 650 near-miss clips were diagnosed; the 856 with a root cause consolidate into
+**56 failure modes** (35 recurring, 21 singletons), led by daytime (246) and night (139) closing conflicts with cars.
 
 ### How we got here (the same 200 held-out clips throughout)
 
@@ -97,8 +98,8 @@ frame; the expensive vision-language reasoning runs **only** on verified anomaly
 |---|---|---|---|
 | ① Mining | Flag 4–8 s edge-case windows, discard routine video | RF-DETR · CMC-SORT · gradient boosting | ✅ validated (held-out recall 0.92 at 2.1 false windows/min) |
 | ② Evidence | Keyframes + zoomed ROI crops + telemetry | OpenCV · CLAHE | ✅ |
-| ③ Diagnosis | Describe + attribute root cause, critic-checked | Qwen3-VL (local) · deterministic rules | ✅ 99.8% valid JSON |
-| ④ Taxonomy | Cluster into ranked SOTIF-tagged failure modes | UMAP/PCA · HDBSCAN | ✅ 21 modes |
+| ③ Diagnosis | Describe + attribute root cause, critic-checked | Qwen3-VL (local) · deterministic rules | ✅ 99.97% valid JSON (3,360 calls) |
+| ④ Taxonomy | Cluster into ranked SOTIF-tagged failure modes | UMAP/PCA · HDBSCAN | ✅ 56 modes from 856 events |
 | ⑤ Remediation | Co-training manifest → fine-tune → prove gains | COCO export · RF-DETR train | ⚙️ machinery built (label-free + CODA-ready) |
 
 ---
@@ -139,12 +140,13 @@ Full step-by-step (Windows, including the held-out protocol and Phase 4): [`RUN_
   (Nexar has no detector-failure labels — that needs CARLA counterfactuals or human review); the
   domain is US/clear-day-heavy; this **mines** events in recorded video, it does **not predict** crashes
   before they are visible.
-- **Diagnosis explains a window; it does not verify it.** On 123 false-alarm windows from held-out
-  *normal* clips, the cards look like real events: 55% AGENT_BEHAVIOR and 24% INCONCLUSIVE (vs. 44% and
-  32% on near-miss windows), 100% valid JSON. The root-cause rules read the same telemetry that fired the
-  window (TTC ≤ 2 s or strong ego-path looming → AGENT_BEHAVIOR), so an "accepted" card says *why* the
-  miner flagged the moment, not that a near-miss happened. Whether those windows are unlabelled close
-  calls needs human review.
+- **Diagnosis explains a window; it does not verify it.** Root-cause labels on 1,142 near-miss windows and
+  on 123 false-alarm windows from held-out *normal* clips are distributed the same way: 54 / 25 / 10 / 9 / 2 %
+  vs. 55 / 24 / 9 / 8 / 3 % (behaviour / inconclusive / occlusion / perception gap / optical). The rules
+  read the same telemetry that fired the window (TTC ≤ 2 s or strong ego-path looming → AGENT_BEHAVIOR),
+  so a card says *why* the miner flagged a moment, not that a near-miss happened, and the taxonomy groups
+  triggers rather than verified failures. Whether false-alarm windows are unlabelled close calls needs
+  human review.
 - **Localizer, not a clip classifier:** 78% of normal-driving clips still get at least one window (down
   from 93%). The value is in narrowing each clip to a few seconds (75% of video discarded, ~2 false
   windows/min), not in declaring whole clips safe.
