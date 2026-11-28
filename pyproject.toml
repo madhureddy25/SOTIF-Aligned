@@ -30,8 +30,9 @@ cluster = ["umap-learn>=0.5"]
 viz = ["fiftyone>=1.0"]
 mcap = ["mcap-ros2-support>=0.5"]
 eval = ["pycocotools>=2.0.7"]
-dev = ["pytest>=8", "ruff>=0.5", "openai>=1.40", "httpx>=0.27", "anthropic>=0.70", "pycocotools>=2.0.7"]
-all = ["sotif-miner[detect,trackers,vllm,ollama,claude,embed,cluster,eval]"]
+review = ["imageio-ffmpeg>=0.5"]
+dev = ["pytest>=8", "ruff>=0.5", "openai>=1.40", "httpx>=0.27", "anthropic>=0.70", "pycocotools>=2.0.7", "imageio-ffmpeg>=0.5"]
+all = ["sotif-miner[detect,trackers,vllm,ollama,claude,embed,cluster,eval,review]"]
 
 [project.scripts]
 sotif-miner = "sotif_miner.cli:app"

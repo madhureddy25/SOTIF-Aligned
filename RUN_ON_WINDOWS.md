@@ -239,21 +239,28 @@ sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar --drop markers
 ```
 
 ## Blind false-alarm review (is it the model or the labels?)
-Build evidence (keyframes only, no VLM) for near-miss *controls* on the same held-out run, then build the page.
-The false-alarm windows of the normal clips already have evidence from `diagnose --only negative`.
+Three arms on real video, shuffled and blinded: every window the model fired on the held-out normal clips
+(false alarms), random windows of the same normal clips it did NOT fire on (base rate), and windows around the
+*labelled* event of near-miss clips (positive control). Clips are cut from the source videos with ffmpeg
+(bundled by the `review` extra) under anonymous names; no GPU is needed for the human part.
 ```
-sotif-miner diagnose --run runs\nexar_heldout_v6_drop --perception runs\nexar_heldout --only positive --limit 40 --skip-vlm
-sotif-miner review-sheet --run runs\nexar_heldout_v6_drop --controls 25
+pip install -e ".[review]"
+sotif-miner review-sheet --run runs\nexar_heldout_v6_drop --near-miss 50 --unflagged 50
 start runs\nexar_heldout_v6_drop\review.html
 ```
-Review every item (keys 1-4, arrows, Space to play), press **Export CSV**, then score it — open
-`review_key.json` only afterwards:
+Type your name, review every item (keys 1-4, arrows, Space, S = slow motion, R = replay), press **Export CSV**.
+A second person can review the same page in their own browser for an agreement score.
+Independent blind judge on the GPU (Ollama; sees 10 frames per clip, no telemetry, resumable):
 ```
-sotif-miner review-score --run runs\nexar_heldout_v6_drop --answers %USERPROFILE%\Downloads\review_answers.csv --out-json runs\review_scores.json
+sotif-miner review-judge --run runs\nexar_heldout_v6_drop
 ```
-The page shows plain keyframes only (no model boxes, timestamps cropped, frames copied under anonymous names
-because the clip number reveals the Nexar label). Controls are positive windows that overlap the labelled event;
-if few of them are judged "close call", the review itself is not reliable.
+Score everything together — open `review_key.json` only afterwards:
+```
+sotif-miner review-score --run runs\nexar_heldout_v6_drop --answers %USERPROFILE%\Downloads\review_answers_<name>.csv --answers runs\nexar_heldout_v6_drop\review_judge_ollama.csv --out-json runs\review_scores.json
+```
+Decision rules (set before reviewing): near-miss controls recognised < 70 % -> the review is not reliable;
+flagged vs unflagged close-call rates (Fisher test) -> does the model find real close calls above the base rate;
+"adjacent lane" in >= 30 % of flagged non-conflicts -> build lane-relative cues (corridor fix first).
 
 ## Phase 4 — closed loop (fine-tune the detector on mined failures, prove it helps)
 Label-free (runs with what you have). The honest proof is re-mining held-out clips, not pseudo-label AP.

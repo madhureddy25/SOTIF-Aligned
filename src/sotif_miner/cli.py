@@ -719,35 +719,59 @@ def confound_cmd(run: Path = typer.Option(..., help="Nexar run folder (train spl
 
 
 @app.command("review-sheet")
-def review_sheet(run: Path = typer.Option(..., help="Run with diagnosed evidence (false alarms + near-miss controls)"),
-                 controls: int = typer.Option(25, help="Near-miss control windows mixed in blind"),
-                 seed: int = typer.Option(0, help="Shuffle / sampling seed")):
-    """Build a blind review page (<run>/review.html) and its answer key (<run>/review_key.json)."""
+def review_sheet(run: Path = typer.Option(..., help="Rescored run (clips/*.json with windows + source videos)"),
+                 near_miss: int = typer.Option(50, help="Near-miss controls (labelled event windows of positives)"),
+                 unflagged: int = typer.Option(50, help="Random windows of normal clips the model did NOT flag"),
+                 context: float = typer.Option(1.0, help="Seconds of video added before and after each window"),
+                 seed: int = typer.Option(0, help="Sampling / shuffle seed")):
+    """Blind video review: every false alarm on normal clips + unflagged-normal and near-miss controls."""
     from .eval.review import build_review
 
-    page, key, n_fa, n_ctrl = build_review(run, controls, seed)
-    typer.echo(f"{n_fa} false-alarm windows + {n_ctrl} near-miss controls, shuffled and blinded")
+    page, key, counts = build_review(run, near_miss, unflagged, seed, context,
+                                     progress=lambda n, t: typer.echo(f"  cut {n}/{t}") if n % 25 == 0 or n == t else None)
+    typer.echo(f"{counts['flagged_normal']} flagged (false-alarm) + {counts['unflagged_normal']} unflagged normal + "
+               f"{counts['near_miss']} near-miss windows, shuffled and blinded")
     typer.echo(f"Open in a browser: {page.resolve()}")
     typer.echo(f"Answer key (do not open before reviewing): {key.resolve()}")
 
 
+@app.command("review-judge")
+def review_judge(run: Path = typer.Option(..., help="Run with review_key.json and review_clips/"),
+                 config: Path | None = typer.Option(None, help="Override YAML (vlm backend/model)"),
+                 frames: int = typer.Option(10, help="Frames sampled per clip for the judge")):
+    """Independent blind VLM judge on the review clips (no telemetry, resumable)."""
+    from .eval.review import judge_review
+    from .vlm.factory import build_backend
+
+    cfg = load_config(config)
+    out = judge_review(run, build_backend(cfg), frames,
+                       progress=lambda n, t: typer.echo(f"  judged {n}/{t}") if n % 10 == 0 or n == t else None)
+    typer.echo(f"Judge verdicts: {out.resolve()}")
+
+
 @app.command("review-score")
 def review_score(run: Path = typer.Option(..., help="Run folder holding review_key.json"),
-                 answers: Path = typer.Option(..., help="review_answers.csv exported from the page"),
+                 answers: list[Path] = typer.Option(..., help="Answer CSVs (human exports and/or judge); repeatable"),
                  out_json: Path | None = typer.Option(None, help="Also write the scores as JSON")):
-    """Score a blind review: what share of false alarms are real close calls, and what drives the rest."""
+    """Score a blind review: false-alarm vs base-rate close calls, control recognition, causes, agreement."""
     from .eval.review import score_review
 
     s = score_review(answers, run / "review_key.json")
-    typer.echo(f"answered {s['answered']}, unanswered {s['unanswered']}")
-    for kind in ("control", "false_alarm"):
-        d = s[kind]
-        typer.echo(f"\n{kind} windows (n={d['n']}):")
-        for v, x in d["verdicts"].items():
-            typer.echo(f"  {v:11s} {x['k']:4d}  {x['share']:.2f}  [{x['ci95'][0]:.2f}, {x['ci95'][1]:.2f}]")
-    top = sorted(s["false_alarm"].get("causes_of_true_errors", {}).items(), key=lambda kv: -kv[1])
-    tagged = ", ".join(f"{c} {n}" for c, n in top if n)
-    typer.echo(f"\nwhat drove the real errors (normal / hard braking): {tagged or 'none tagged'}")
+    typer.echo("items: " + ", ".join(f"{k} {v}" for k, v in s["items"].items()))
+    for name, r in s["raters"].items():
+        typer.echo(f"\n== {name} ({r['answered']} answered)")
+        for kind, d in r["arms"].items():
+            typer.echo(f"  {kind} (n={d['n']}): " + "  ".join(
+                f"{v} {x['share']:.2f} [{x['ci95'][0]:.2f},{x['ci95'][1]:.2f}]" for v, x in d["verdicts"].items()))
+        c = r["flagged_vs_unflagged_close_call"]
+        typer.echo(f"  close calls: flagged {c['flagged']:.2f} vs unflagged {c['unflagged']:.2f} "
+                   f"(difference {c['difference']:+.2f}, one-sided Fisher p={c['fisher_p_one_sided']:.4f})")
+        top = sorted(r["arms"]["flagged_normal"]["causes_of_non_conflicts"].items(), key=lambda kv: -kv[1])
+        tagged = ", ".join(f"{k} {n}" for k, n in top if n)
+        typer.echo(f"  causes of flagged non-conflicts: {tagged or 'none tagged'}")
+    for pair, g in s["agreement"].items():
+        typer.echo(f"\nagreement {pair}: n={g['n']}, kappa {g['kappa_4class']:.2f} (4-class), "
+                   f"{g['kappa_close_call']:.2f} (close call vs not)")
     if out_json:
         out_json.write_text(json.dumps(s, indent=2))
 
