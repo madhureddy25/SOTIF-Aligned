@@ -718,6 +718,40 @@ def confound_cmd(run: Path = typer.Option(..., help="Nexar run folder (train spl
         out_json.write_text(json.dumps({"counts": counts, "rows": rows}, indent=2))
 
 
+@app.command("review-sheet")
+def review_sheet(run: Path = typer.Option(..., help="Run with diagnosed evidence (false alarms + near-miss controls)"),
+                 controls: int = typer.Option(25, help="Near-miss control windows mixed in blind"),
+                 seed: int = typer.Option(0, help="Shuffle / sampling seed")):
+    """Build a blind review page (<run>/review.html) and its answer key (<run>/review_key.json)."""
+    from .eval.review import build_review
+
+    page, key, n_fa, n_ctrl = build_review(run, controls, seed)
+    typer.echo(f"{n_fa} false-alarm windows + {n_ctrl} near-miss controls, shuffled and blinded")
+    typer.echo(f"Open in a browser: {page.resolve()}")
+    typer.echo(f"Answer key (do not open before reviewing): {key.resolve()}")
+
+
+@app.command("review-score")
+def review_score(run: Path = typer.Option(..., help="Run folder holding review_key.json"),
+                 answers: Path = typer.Option(..., help="review_answers.csv exported from the page"),
+                 out_json: Path | None = typer.Option(None, help="Also write the scores as JSON")):
+    """Score a blind review: what share of false alarms are real close calls, and what drives the rest."""
+    from .eval.review import score_review
+
+    s = score_review(answers, run / "review_key.json")
+    typer.echo(f"answered {s['answered']}, unanswered {s['unanswered']}")
+    for kind in ("control", "false_alarm"):
+        d = s[kind]
+        typer.echo(f"\n{kind} windows (n={d['n']}):")
+        for v, x in d["verdicts"].items():
+            typer.echo(f"  {v:11s} {x['k']:4d}  {x['share']:.2f}  [{x['ci95'][0]:.2f}, {x['ci95'][1]:.2f}]")
+    top = sorted(s["false_alarm"].get("causes_of_true_errors", {}).items(), key=lambda kv: -kv[1])
+    tagged = ", ".join(f"{c} {n}" for c, n in top if n)
+    typer.echo(f"\nwhat drove the real errors (normal / hard braking): {tagged or 'none tagged'}")
+    if out_json:
+        out_json.write_text(json.dumps(s, indent=2))
+
+
 @app.command("nexar-eval")
 def nexar_eval(run: Path = typer.Option(..., help="Folder written by `sotif-miner nexar`"),
                root: Path = typer.Option(..., help="Nexar dataset root"),

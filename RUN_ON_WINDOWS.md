@@ -238,6 +238,23 @@ sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar --no-raw
 sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar --drop markers --no-raw
 ```
 
+## Blind false-alarm review (is it the model or the labels?)
+Build evidence (keyframes only, no VLM) for near-miss *controls* on the same held-out run, then build the page.
+The false-alarm windows of the normal clips already have evidence from `diagnose --only negative`.
+```
+sotif-miner diagnose --run runs\nexar_heldout_v6_drop --perception runs\nexar_heldout --only positive --limit 40 --skip-vlm
+sotif-miner review-sheet --run runs\nexar_heldout_v6_drop --controls 25
+start runs\nexar_heldout_v6_drop\review.html
+```
+Review every item (keys 1-4, arrows, Space to play), press **Export CSV**, then score it — open
+`review_key.json` only afterwards:
+```
+sotif-miner review-score --run runs\nexar_heldout_v6_drop --answers %USERPROFILE%\Downloads\review_answers.csv --out-json runs\review_scores.json
+```
+The page shows plain keyframes only (no model boxes, timestamps cropped, frames copied under anonymous names
+because the clip number reveals the Nexar label). Controls are positive windows that overlap the labelled event;
+if few of them are judged "close call", the review itself is not reliable.
+
 ## Phase 4 — closed loop (fine-tune the detector on mined failures, prove it helps)
 Label-free (runs with what you have). The honest proof is re-mining held-out clips, not pseudo-label AP.
 ```
