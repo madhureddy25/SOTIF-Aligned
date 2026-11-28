@@ -256,7 +256,7 @@ sotif-miner review-judge --run runs\nexar_heldout_v6_drop
 ```
 Score everything together — open `review_key.json` only afterwards:
 ```
-sotif-miner review-score --run runs\nexar_heldout_v6_drop --answers %USERPROFILE%\Downloads\review_answers_<name>.csv --answers runs\nexar_heldout_v6_drop\review_judge.csv --out-json runs\review_scores.json
+sotif-miner review-score --run runs\nexar_heldout_v6_drop --answers $env:USERPROFILE\Downloads\review_answers_<name>.csv --answers runs\nexar_heldout_v6_drop\review_judge.csv --out-json runs\review_scores.json
 ```
 Decision rules (set before reviewing): near-miss controls recognised < 70 % -> the review is not reliable;
 flagged vs unflagged close-call rates (Fisher test) -> does the model find real close calls above the base rate;
