@@ -1,0 +1,2609 @@
+[
+  {
+    "cluster_id": "M027",
+    "name": "Clear daytime closing/interaction conflict with car",
+    "description": "246 events. Dominant root cause AGENT_BEHAVIOR; actor car; context clear daytime. Example: The ego vehicle is approaching a black sedan directly ahead at a crosswalk, with a short time-to-collision (TTC 0.8s) and high looming speed",
+    "size": 246,
+    "severity": 0.484,
+    "rank_score": 242.149,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00341_w001",
+      "nexar_train_00341_w002",
+      "nexar_train_00444_w000",
+      "nexar_train_00836_w001",
+      "nexar_train_00063_w000",
+      "nexar_train_00078_w001",
+      "nexar_train_00090_w001",
+      "nexar_train_00098_w001",
+      "nexar_train_00301_w000",
+      "nexar_train_00435_w000",
+      "nexar_train_00496_w000",
+      "nexar_train_00501_w001",
+      "nexar_train_00608_w000",
+      "nexar_train_00608_w001",
+      "nexar_train_00843_w000",
+      "nexar_train_00995_w000",
+      "nexar_train_00082_w001",
+      "nexar_train_00596_w000",
+      "nexar_train_00639_w000",
+      "nexar_train_00645_w000",
+      "nexar_train_00693_w000",
+      "nexar_train_00727_w002",
+      "nexar_train_00875_w001",
+      "nexar_train_00006_w001",
+      "nexar_train_00125_w000",
+      "nexar_train_00349_w000",
+      "nexar_train_00425_w001",
+      "nexar_train_00013_w001",
+      "nexar_train_00044_w000",
+      "nexar_train_00046_w002",
+      "nexar_train_00068_w001",
+      "nexar_train_00090_w000",
+      "nexar_train_00727_w000",
+      "nexar_train_00758_w001",
+      "nexar_train_00382_w002",
+      "nexar_train_00600_w000",
+      "nexar_train_00600_w001",
+      "nexar_train_00098_w000",
+      "nexar_train_00109_w001",
+      "nexar_train_00579_w000",
+      "nexar_train_00358_w001",
+      "nexar_train_00449_w000",
+      "nexar_train_00541_w000",
+      "nexar_train_00645_w001",
+      "nexar_train_00981_w000",
+      "nexar_train_00343_w001",
+      "nexar_train_00361_w000",
+      "nexar_train_00771_w000",
+      "nexar_train_00876_w003",
+      "nexar_train_00980_w000",
+      "nexar_train_00464_w000",
+      "nexar_train_00585_w000",
+      "nexar_train_00686_w000",
+      "nexar_train_00828_w001",
+      "nexar_train_00481_w002",
+      "nexar_train_00571_w001",
+      "nexar_train_01024_w000",
+      "nexar_train_00434_w000",
+      "nexar_train_00729_w003",
+      "nexar_train_00792_w000",
+      "nexar_train_00792_w001",
+      "nexar_train_00828_w000",
+      "nexar_train_00014_w000",
+      "nexar_train_00329_w001",
+      "nexar_train_00539_w000",
+      "nexar_train_00539_w002",
+      "nexar_train_00584_w001",
+      "nexar_train_00850_w001",
+      "nexar_train_00021_w000",
+      "nexar_train_00068_w002",
+      "nexar_train_00288_w000",
+      "nexar_train_00354_w001",
+      "nexar_train_00413_w000",
+      "nexar_train_00443_w001",
+      "nexar_train_00644_w001",
+      "nexar_train_01004_w000",
+      "nexar_train_00049_w002",
+      "nexar_train_00430_w000",
+      "nexar_train_00719_w000",
+      "nexar_train_00858_w001",
+      "nexar_train_00276_w001",
+      "nexar_train_00292_w001",
+      "nexar_train_00301_w001",
+      "nexar_train_00318_w003",
+      "nexar_train_00456_w000",
+      "nexar_train_00758_w002",
+      "nexar_train_00774_w000",
+      "nexar_train_00022_w000",
+      "nexar_train_00363_w001",
+      "nexar_train_00372_w000",
+      "nexar_train_00587_w000",
+      "nexar_train_00589_w001",
+      "nexar_train_00966_w001",
+      "nexar_train_00966_w002",
+      "nexar_train_00416_w002",
+      "nexar_train_00503_w001",
+      "nexar_train_00591_w003",
+      "nexar_train_00057_w000",
+      "nexar_train_00309_w000",
+      "nexar_train_00831_w000",
+      "nexar_train_00118_w001",
+      "nexar_train_00276_w000",
+      "nexar_train_00516_w000",
+      "nexar_train_00609_w000",
+      "nexar_train_00286_w001",
+      "nexar_train_00364_w000",
+      "nexar_train_00637_w000",
+      "nexar_train_00817_w002",
+      "nexar_train_00917_w000",
+      "nexar_train_00013_w002",
+      "nexar_train_00640_w001",
+      "nexar_train_00740_w001",
+      "nexar_train_00360_w001",
+      "nexar_train_00389_w000",
+      "nexar_train_00744_w000",
+      "nexar_train_00958_w000",
+      "nexar_train_00976_w001",
+      "nexar_train_00127_w001",
+      "nexar_train_00302_w000",
+      "nexar_train_00320_w002",
+      "nexar_train_00827_w000",
+      "nexar_train_00657_w001",
+      "nexar_train_00737_w000",
+      "nexar_train_00913_w000",
+      "nexar_train_00598_w000",
+      "nexar_train_00977_w000",
+      "nexar_train_01039_w000",
+      "nexar_train_00031_w001",
+      "nexar_train_00589_w000",
+      "nexar_train_00819_w000",
+      "nexar_train_00627_w001",
+      "nexar_train_00788_w000",
+      "nexar_train_00789_w001",
+      "nexar_train_00817_w001",
+      "nexar_train_00884_w000",
+      "nexar_train_00122_w000",
+      "nexar_train_00286_w000",
+      "nexar_train_00959_w000",
+      "nexar_train_00047_w001",
+      "nexar_train_00318_w002",
+      "nexar_train_00332_w000",
+      "nexar_train_00348_w000",
+      "nexar_train_00426_w000",
+      "nexar_train_00479_w000",
+      "nexar_train_00480_w000",
+      "nexar_train_00605_w001",
+      "nexar_train_00864_w000",
+      "nexar_train_00124_w001",
+      "nexar_train_00312_w000",
+      "nexar_train_00895_w001",
+      "nexar_train_00658_w001",
+      "nexar_train_00819_w001",
+      "nexar_train_00827_w001",
+      "nexar_train_00856_w001",
+      "nexar_train_00889_w001",
+      "nexar_train_00912_w000",
+      "nexar_train_00102_w000",
+      "nexar_train_00290_w001",
+      "nexar_train_00527_w001",
+      "nexar_train_00551_w000",
+      "nexar_train_00653_w000",
+      "nexar_train_00785_w001",
+      "nexar_train_00794_w000",
+      "nexar_train_00851_w002",
+      "nexar_train_01000_w000",
+      "nexar_train_00029_w001",
+      "nexar_train_00110_w001",
+      "nexar_train_00287_w000",
+      "nexar_train_00294_w000",
+      "nexar_train_00302_w001",
+      "nexar_train_00392_w000",
+      "nexar_train_00491_w000",
+      "nexar_train_00538_w001",
+      "nexar_train_00598_w001",
+      "nexar_train_00670_w000",
+      "nexar_train_00955_w001",
+      "nexar_train_00963_w000",
+      "nexar_train_00963_w001",
+      "nexar_train_00039_w000",
+      "nexar_train_00294_w001",
+      "nexar_train_00782_w001",
+      "nexar_train_00988_w000",
+      "nexar_train_00127_w002",
+      "nexar_train_00282_w001",
+      "nexar_train_00395_w001",
+      "nexar_train_00495_w000",
+      "nexar_train_00554_w001",
+      "nexar_train_00896_w002",
+      "nexar_train_00663_w000",
+      "nexar_train_00851_w001",
+      "nexar_train_00873_w003",
+      "nexar_train_00948_w001",
+      "nexar_train_00599_w002",
+      "nexar_train_00692_w000",
+      "nexar_train_00861_w000",
+      "nexar_train_00906_w002",
+      "nexar_train_00954_w001",
+      "nexar_train_00955_w000",
+      "nexar_train_00004_w000",
+      "nexar_train_00663_w001",
+      "nexar_train_00731_w000",
+      "nexar_train_00832_w000",
+      "nexar_train_00099_w000",
+      "nexar_train_00389_w001",
+      "nexar_train_00692_w001",
+      "nexar_train_00761_w000",
+      "nexar_train_00831_w001",
+      "nexar_train_00914_w000",
+      "nexar_train_01003_w001",
+      "nexar_train_00016_w001",
+      "nexar_train_00036_w000",
+      "nexar_train_00046_w001",
+      "nexar_train_00084_w002",
+      "nexar_train_00282_w002",
+      "nexar_train_00288_w001",
+      "nexar_train_00290_w000",
+      "nexar_train_00296_w000",
+      "nexar_train_00344_w003",
+      "nexar_train_00375_w001",
+      "nexar_train_00410_w000",
+      "nexar_train_00417_w001",
+      "nexar_train_00420_w000",
+      "nexar_train_00422_w002",
+      "nexar_train_00422_w003",
+      "nexar_train_00466_w000",
+      "nexar_train_00477_w000",
+      "nexar_train_00481_w001",
+      "nexar_train_00512_w000",
+      "nexar_train_00527_w000",
+      "nexar_train_00549_w001",
+      "nexar_train_00560_w001",
+      "nexar_train_00585_w001",
+      "nexar_train_00644_w000",
+      "nexar_train_00696_w001",
+      "nexar_train_00704_w000",
+      "nexar_train_00787_w000",
+      "nexar_train_00830_w000",
+      "nexar_train_00859_w000",
+      "nexar_train_00872_w000",
+      "nexar_train_00910_w000",
+      "nexar_train_00948_w000",
+      "nexar_train_00953_w000",
+      "nexar_train_00996_w000",
+      "nexar_train_00998_w000",
+      "nexar_train_01024_w001",
+      "nexar_train_01033_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00013_w001",
+      "nexar_train_00047_w001",
+      "nexar_train_00348_w000",
+      "nexar_train_00864_w000",
+      "nexar_train_00044_w000"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 246
+    },
+    "triggering_hist": {
+      "none": 246
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 51,
+      "clear": 195
+    },
+    "illumination_hist": {
+      "day": 245,
+      "glare": 1
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M030",
+    "name": "Night closing/interaction conflict with car",
+    "description": "139 events. Dominant root cause AGENT_BEHAVIOR; actor car; context night. Example: A white Tesla is directly ahead, followed by a silver sedan, with a motorcycle partially visible in the lane. The imminent closing conflict ",
+    "size": 139,
+    "severity": 0.482,
+    "rank_score": 136.543,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00061_w001",
+      "nexar_train_00076_w001",
+      "nexar_train_00610_w001",
+      "nexar_train_00071_w000",
+      "nexar_train_00357_w000",
+      "nexar_train_00809_w001",
+      "nexar_train_01013_w000",
+      "nexar_train_01035_w001",
+      "nexar_train_00041_w002",
+      "nexar_train_00355_w001",
+      "nexar_train_00624_w000",
+      "nexar_train_00624_w002",
+      "nexar_train_00869_w001",
+      "nexar_train_00381_w001",
+      "nexar_train_00707_w001",
+      "nexar_train_00849_w001",
+      "nexar_train_00328_w005",
+      "nexar_train_00463_w001",
+      "nexar_train_00521_w003",
+      "nexar_train_00614_w001",
+      "nexar_train_00651_w000",
+      "nexar_train_00652_w000",
+      "nexar_train_01016_w000",
+      "nexar_train_00289_w000",
+      "nexar_train_00371_w001",
+      "nexar_train_00647_w001",
+      "nexar_train_00694_w002",
+      "nexar_train_00802_w000",
+      "nexar_train_00308_w002",
+      "nexar_train_00458_w001",
+      "nexar_train_00643_w000",
+      "nexar_train_00845_w000",
+      "nexar_train_00911_w001",
+      "nexar_train_00393_w001",
+      "nexar_train_00475_w001",
+      "nexar_train_00648_w000",
+      "nexar_train_00755_w000",
+      "nexar_train_00563_w001",
+      "nexar_train_00813_w001",
+      "nexar_train_00930_w001",
+      "nexar_train_00319_w000",
+      "nexar_train_00472_w001",
+      "nexar_train_00502_w001",
+      "nexar_train_00543_w000",
+      "nexar_train_00698_w001",
+      "nexar_train_00741_w002",
+      "nexar_train_00839_w000",
+      "nexar_train_00860_w000",
+      "nexar_train_00866_w000",
+      "nexar_train_00307_w000",
+      "nexar_train_00427_w000",
+      "nexar_train_00428_w000",
+      "nexar_train_00636_w001",
+      "nexar_train_00648_w001",
+      "nexar_train_00824_w001",
+      "nexar_train_00936_w000",
+      "nexar_train_00331_w000",
+      "nexar_train_00440_w000",
+      "nexar_train_00651_w001",
+      "nexar_train_00695_w000",
+      "nexar_train_00041_w001",
+      "nexar_train_00355_w000",
+      "nexar_train_00437_w002",
+      "nexar_train_00570_w000",
+      "nexar_train_00580_w000",
+      "nexar_train_00581_w002",
+      "nexar_train_00594_w001",
+      "nexar_train_00773_w000",
+      "nexar_train_00037_w001",
+      "nexar_train_00437_w001",
+      "nexar_train_00553_w000",
+      "nexar_train_00816_w000",
+      "nexar_train_00647_w000",
+      "nexar_train_00825_w000",
+      "nexar_train_00825_w001",
+      "nexar_train_00891_w001",
+      "nexar_train_01013_w001",
+      "nexar_train_00813_w000",
+      "nexar_train_00865_w002",
+      "nexar_train_00869_w000",
+      "nexar_train_00072_w000",
+      "nexar_train_00418_w001",
+      "nexar_train_00471_w000",
+      "nexar_train_00656_w000",
+      "nexar_train_00688_w000",
+      "nexar_train_00745_w000",
+      "nexar_train_00769_w000",
+      "nexar_train_00769_w001",
+      "nexar_train_00079_w001",
+      "nexar_train_00387_w000",
+      "nexar_train_00428_w001",
+      "nexar_train_00534_w002",
+      "nexar_train_00978_w001",
+      "nexar_train_00317_w000",
+      "nexar_train_00324_w000",
+      "nexar_train_00460_w001",
+      "nexar_train_00463_w002",
+      "nexar_train_00860_w001",
+      "nexar_train_00890_w000",
+      "nexar_train_01020_w001",
+      "nexar_train_00407_w001",
+      "nexar_train_00431_w000",
+      "nexar_train_00666_w001",
+      "nexar_train_00707_w000",
+      "nexar_train_00805_w000",
+      "nexar_train_00839_w001",
+      "nexar_train_00897_w000",
+      "nexar_train_00898_w000",
+      "nexar_train_00366_w000",
+      "nexar_train_00380_w002",
+      "nexar_train_00452_w000",
+      "nexar_train_00494_w000",
+      "nexar_train_00540_w000",
+      "nexar_train_00629_w000",
+      "nexar_train_00804_w000",
+      "nexar_train_00840_w001",
+      "nexar_train_00324_w001",
+      "nexar_train_00403_w000",
+      "nexar_train_00498_w000",
+      "nexar_train_00674_w000",
+      "nexar_train_00453_w001",
+      "nexar_train_00583_w001",
+      "nexar_train_00694_w001",
+      "nexar_train_00777_w002",
+      "nexar_train_00952_w000",
+      "nexar_train_00971_w000",
+      "nexar_train_01020_w000",
+      "nexar_train_00565_w000",
+      "nexar_train_00700_w001",
+      "nexar_train_00865_w003",
+      "nexar_train_00042_w000",
+      "nexar_train_00371_w002",
+      "nexar_train_00380_w001",
+      "nexar_train_00546_w001",
+      "nexar_train_00666_w000",
+      "nexar_train_00682_w000",
+      "nexar_train_00688_w001",
+      "nexar_train_00840_w000",
+      "nexar_train_00842_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00437_w002",
+      "nexar_train_00289_w000",
+      "nexar_train_00816_w000",
+      "nexar_train_00371_w001",
+      "nexar_train_00707_w001"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 139
+    },
+    "triggering_hist": {
+      "none": 138,
+      "low_light": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 139
+    },
+    "illumination_hist": {
+      "night": 139
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M024",
+    "name": "Clear daytime closing/interaction conflict with truck",
+    "description": "41 events. Dominant root cause AGENT_BEHAVIOR; actor truck; context clear daytime. Example: An ambulance with flashing emergency lights is moving slowly ahead, creating an imminent collision risk as the ego vehicle approaches with a",
+    "size": 41,
+    "severity": 0.478,
+    "rank_score": 40.092,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00104_w001",
+      "nexar_train_00295_w001",
+      "nexar_train_00361_w001",
+      "nexar_train_00577_w000",
+      "nexar_train_00577_w001",
+      "nexar_train_00836_w002",
+      "nexar_train_00876_w001",
+      "nexar_train_00981_w001",
+      "nexar_train_00010_w001",
+      "nexar_train_00310_w000",
+      "nexar_train_00574_w000",
+      "nexar_train_00621_w001",
+      "nexar_train_00729_w002",
+      "nexar_train_00753_w001",
+      "nexar_train_00754_w000",
+      "nexar_train_00375_w002",
+      "nexar_train_00560_w000",
+      "nexar_train_00627_w002",
+      "nexar_train_00640_w000",
+      "nexar_train_00895_w000",
+      "nexar_train_00989_w001",
+      "nexar_train_00130_w000",
+      "nexar_train_00300_w000",
+      "nexar_train_00477_w001",
+      "nexar_train_00832_w001",
+      "nexar_train_00095_w000",
+      "nexar_train_00124_w000",
+      "nexar_train_00516_w001",
+      "nexar_train_00564_w001",
+      "nexar_train_00599_w001",
+      "nexar_train_00765_w000",
+      "nexar_train_00803_w001",
+      "nexar_train_00803_w002",
+      "nexar_train_00086_w001",
+      "nexar_train_00486_w001",
+      "nexar_train_00607_w001",
+      "nexar_train_00023_w001",
+      "nexar_train_00667_w000",
+      "nexar_train_00725_w000",
+      "nexar_train_00888_w001",
+      "nexar_train_00989_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00560_w000",
+      "nexar_train_00627_w002",
+      "nexar_train_00895_w000",
+      "nexar_train_00104_w001",
+      "nexar_train_00310_w000"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 41
+    },
+    "triggering_hist": {
+      "none": 41
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 15,
+      "clear": 26
+    },
+    "illumination_hist": {
+      "day": 41
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M005",
+    "name": "Clear daytime perception blind spot with car",
+    "description": "34 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor car; context clear daytime. Example: A primary vehicle is tracked with low confidence and intermittent dropout, creating a perception gap that could lead to missed collision war",
+    "size": 34,
+    "severity": 0.47,
+    "rank_score": 32.97,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00334_w001",
+      "nexar_train_00512_w001",
+      "nexar_train_00537_w001",
+      "nexar_train_00603_w000",
+      "nexar_train_00733_w001",
+      "nexar_train_00940_w001",
+      "nexar_train_00022_w001",
+      "nexar_train_00032_w000",
+      "nexar_train_00641_w001",
+      "nexar_train_00062_w002",
+      "nexar_train_00660_w002",
+      "nexar_train_00976_w002",
+      "nexar_train_00417_w002",
+      "nexar_train_00495_w001",
+      "nexar_train_00655_w001",
+      "nexar_train_00673_w000",
+      "nexar_train_00904_w001",
+      "nexar_train_00915_w000",
+      "nexar_train_00917_w001",
+      "nexar_train_00943_w000",
+      "nexar_train_00083_w002",
+      "nexar_train_00423_w000",
+      "nexar_train_00562_w002",
+      "nexar_train_00863_w001",
+      "nexar_train_00879_w001",
+      "nexar_train_00940_w002",
+      "nexar_train_00980_w001",
+      "nexar_train_00397_w001",
+      "nexar_train_00584_w002",
+      "nexar_train_00617_w001",
+      "nexar_train_00049_w001",
+      "nexar_train_00133_w001",
+      "nexar_train_00551_w001",
+      "nexar_train_00879_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00397_w001",
+      "nexar_train_00551_w001",
+      "nexar_train_00584_w002",
+      "nexar_train_00617_w001",
+      "nexar_train_00733_w001"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 34
+    },
+    "triggering_hist": {
+      "none": 31,
+      "low_light": 2,
+      "glare": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 22,
+      "unknown": 12
+    },
+    "illumination_hist": {
+      "day": 32,
+      "glare": 1,
+      "tunnel": 1
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M004",
+    "name": "Clear daytime occluded-actor emergence with car",
+    "description": "36 events. Dominant root cause DYNAMIC_OCCLUSION; actor car; context clear daytime. Example: A car (actor 1) emerges from behind another vehicle, creating a dynamic occlusion that temporarily obscures its presence, which could lead t",
+    "size": 36,
+    "severity": 0.397,
+    "rank_score": 32.303,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00109_w000",
+      "nexar_train_00467_w000",
+      "nexar_train_00735_w000",
+      "nexar_train_00766_w000",
+      "nexar_train_00771_w002",
+      "nexar_train_00874_w000",
+      "nexar_train_00501_w000",
+      "nexar_train_00902_w000",
+      "nexar_train_00906_w001",
+      "nexar_train_00912_w001",
+      "nexar_train_00959_w001",
+      "nexar_train_00019_w000",
+      "nexar_train_00457_w000",
+      "nexar_train_00505_w001",
+      "nexar_train_00591_w004",
+      "nexar_train_00655_w000",
+      "nexar_train_00696_w000",
+      "nexar_train_00097_w000",
+      "nexar_train_00117_w002",
+      "nexar_train_00530_w001",
+      "nexar_train_00538_w000",
+      "nexar_train_00938_w000",
+      "nexar_train_01028_w001",
+      "nexar_train_00004_w001",
+      "nexar_train_00292_w000",
+      "nexar_train_00520_w001",
+      "nexar_train_00858_w000",
+      "nexar_train_00326_w000",
+      "nexar_train_00360_w000",
+      "nexar_train_00544_w001",
+      "nexar_train_01004_w001",
+      "nexar_train_00132_w000",
+      "nexar_train_00303_w002",
+      "nexar_train_00401_w000",
+      "nexar_train_00416_w001",
+      "nexar_train_00635_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00132_w000",
+      "nexar_train_00959_w001",
+      "nexar_train_00912_w001",
+      "nexar_train_00416_w001",
+      "nexar_train_00544_w001"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 36
+    },
+    "triggering_hist": {
+      "none": 31,
+      "occluding_object": 5
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 7,
+      "clear": 29
+    },
+    "illumination_hist": {
+      "day": 34,
+      "glare": 1,
+      "dusk_dawn": 1
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M018",
+    "name": "Rain night closing/interaction conflict with car",
+    "description": "30 events. Dominant root cause AGENT_BEHAVIOR; actor car; context rain night. Example: A dark sedan is turning left at an intersection with a green light, approaching the ego vehicle at high speed and imminent collision. The sa",
+    "size": 30,
+    "severity": 0.493,
+    "rank_score": 29.789,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00037_w002",
+      "nexar_train_00594_w000",
+      "nexar_train_00714_w000",
+      "nexar_train_00835_w000",
+      "nexar_train_00890_w001",
+      "nexar_train_00114_w001",
+      "nexar_train_00634_w002",
+      "nexar_train_00823_w000",
+      "nexar_train_01036_w000",
+      "nexar_train_00557_w000",
+      "nexar_train_00691_w001",
+      "nexar_train_00734_w000",
+      "nexar_train_00926_w002",
+      "nexar_train_01037_w001",
+      "nexar_train_00058_w000",
+      "nexar_train_00108_w000",
+      "nexar_train_00123_w001",
+      "nexar_train_00336_w001",
+      "nexar_train_00450_w000",
+      "nexar_train_00450_w001",
+      "nexar_train_00968_w002",
+      "nexar_train_01036_w001",
+      "nexar_train_00734_w001",
+      "nexar_train_00776_w001",
+      "nexar_train_00968_w001",
+      "nexar_train_01037_w000",
+      "nexar_train_00472_w002",
+      "nexar_train_00763_w000",
+      "nexar_train_01008_w001",
+      "nexar_train_00123_w002"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00114_w001",
+      "nexar_train_01036_w000",
+      "nexar_train_00823_w000",
+      "nexar_train_00634_w002",
+      "nexar_train_00037_w002"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 30
+    },
+    "triggering_hist": {
+      "none": 30
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 30
+    },
+    "illumination_hist": {
+      "night": 30
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M023",
+    "name": "Clear daytime closing/interaction conflict with other",
+    "description": "29 events. Dominant root cause AGENT_BEHAVIOR; actor other; context clear daytime. Example: A black SUV is directly ahead, with a pedestrian crossing the street, creating an imminent collision risk due to low TTC and high ego-path l",
+    "size": 29,
+    "severity": 0.517,
+    "rank_score": 29.479,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00325_w000",
+      "nexar_train_00562_w001",
+      "nexar_train_00621_w002",
+      "nexar_train_00875_w000",
+      "nexar_train_00354_w000",
+      "nexar_train_00864_w001",
+      "nexar_train_00997_w000",
+      "nexar_train_00086_w002",
+      "nexar_train_00391_w002",
+      "nexar_train_00556_w001",
+      "nexar_train_00568_w001",
+      "nexar_train_00667_w001",
+      "nexar_train_00765_w001",
+      "nexar_train_00130_w001",
+      "nexar_train_00413_w001",
+      "nexar_train_00456_w001",
+      "nexar_train_00549_w002",
+      "nexar_train_00715_w000",
+      "nexar_train_00500_w001",
+      "nexar_train_00550_w001",
+      "nexar_train_00795_w001",
+      "nexar_train_00550_w000",
+      "nexar_train_00683_w000",
+      "nexar_train_00988_w001",
+      "nexar_train_00287_w001",
+      "nexar_train_00391_w001",
+      "nexar_train_00888_w000",
+      "nexar_train_00340_w000",
+      "nexar_train_00785_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00997_w000",
+      "nexar_train_00354_w000",
+      "nexar_train_00683_w000",
+      "nexar_train_00785_w000",
+      "nexar_train_00864_w001"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 29
+    },
+    "triggering_hist": {
+      "none": 29
+    },
+    "ncap_hist": {
+      "AEB_cyclist": 2
+    },
+    "weather_hist": {
+      "unknown": 4,
+      "clear": 25
+    },
+    "illumination_hist": {
+      "day": 29
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M025",
+    "name": "Night occluded-actor emergence with car",
+    "description": "33 events. Dominant root cause DYNAMIC_OCCLUSION; actor car; context night. Example: A red car (actor 1) is partially occluded by a white car passing in front, causing a dynamic occlusion that temporarily masks the focus acto",
+    "size": 33,
+    "severity": 0.385,
+    "rank_score": 29.201,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00072_w001",
+      "nexar_train_00378_w000",
+      "nexar_train_00458_w000",
+      "nexar_train_00519_w000",
+      "nexar_train_00519_w001",
+      "nexar_train_00542_w000",
+      "nexar_train_00614_w002",
+      "nexar_train_00630_w000",
+      "nexar_train_00659_w000",
+      "nexar_train_00991_w000",
+      "nexar_train_00027_w001",
+      "nexar_train_00455_w001",
+      "nexar_train_00750_w000",
+      "nexar_train_00105_w000",
+      "nexar_train_00335_w000",
+      "nexar_train_00381_w000",
+      "nexar_train_00741_w001",
+      "nexar_train_00064_w000",
+      "nexar_train_00106_w002",
+      "nexar_train_00119_w000",
+      "nexar_train_00617_w000",
+      "nexar_train_00668_w001",
+      "nexar_train_00674_w001",
+      "nexar_train_00985_w001",
+      "nexar_train_00590_w000",
+      "nexar_train_00636_w000",
+      "nexar_train_00642_w001",
+      "nexar_train_00703_w001",
+      "nexar_train_00074_w000",
+      "nexar_train_00336_w000",
+      "nexar_train_00369_w000",
+      "nexar_train_00606_w000",
+      "nexar_train_00684_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00741_w001",
+      "nexar_train_00381_w000",
+      "nexar_train_00335_w000",
+      "nexar_train_00991_w000",
+      "nexar_train_00105_w000"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 33
+    },
+    "triggering_hist": {
+      "occluding_object": 5,
+      "none": 28
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 33
+    },
+    "illumination_hist": {
+      "night": 33
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M029",
+    "name": "Rain closing/interaction conflict with car",
+    "description": "24 events. Dominant root cause AGENT_BEHAVIOR; actor car; context rain. Example: The ego vehicle approaches a parked car with imminent closing conflict, indicated by high looming speed and short TTC, suggesting a potentia",
+    "size": 24,
+    "severity": 0.468,
+    "rank_score": 23.223,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00084_w001",
+      "nexar_train_00558_w000",
+      "nexar_train_00558_w001",
+      "nexar_train_00677_w000",
+      "nexar_train_01019_w000",
+      "nexar_train_00065_w001",
+      "nexar_train_00121_w001",
+      "nexar_train_00298_w001",
+      "nexar_train_00510_w000",
+      "nexar_train_00625_w000",
+      "nexar_train_00931_w000",
+      "nexar_train_00964_w001",
+      "nexar_train_00964_w002",
+      "nexar_train_00398_w000",
+      "nexar_train_00406_w000",
+      "nexar_train_00415_w000",
+      "nexar_train_00945_w000",
+      "nexar_train_00961_w001",
+      "nexar_train_00370_w000",
+      "nexar_train_00523_w001",
+      "nexar_train_00705_w003",
+      "nexar_train_00961_w000",
+      "nexar_train_00028_w001",
+      "nexar_train_00321_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00321_w000",
+      "nexar_train_00705_w003",
+      "nexar_train_00961_w000",
+      "nexar_train_00523_w001",
+      "nexar_train_00121_w001"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 24
+    },
+    "triggering_hist": {
+      "none": 24
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 24
+    },
+    "illumination_hist": {
+      "day": 24
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M021",
+    "name": "Night perception blind spot with car",
+    "description": "24 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor car; context night. Example: A vehicle with flashing red lights is identified as a primary hazard, but its perception is unstable due to a sudden fire/explosion event th",
+    "size": 24,
+    "severity": 0.425,
+    "rank_score": 22.198,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00024_w000",
+      "nexar_train_00112_w001",
+      "nexar_train_00376_w000",
+      "nexar_train_00418_w000",
+      "nexar_train_00497_w000",
+      "nexar_train_00669_w001",
+      "nexar_train_00897_w001",
+      "nexar_train_00911_w000",
+      "nexar_train_01011_w002",
+      "nexar_train_00285_w001",
+      "nexar_train_00366_w001",
+      "nexar_train_00403_w001",
+      "nexar_train_00440_w001",
+      "nexar_train_00483_w000",
+      "nexar_train_00650_w001",
+      "nexar_train_00668_w000",
+      "nexar_train_00762_w002",
+      "nexar_train_00818_w000",
+      "nexar_train_00838_w000",
+      "nexar_train_00866_w001",
+      "nexar_train_00928_w000",
+      "nexar_train_00936_w001",
+      "nexar_train_00982_w000",
+      "nexar_train_00405_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00405_w001",
+      "nexar_train_00928_w000",
+      "nexar_train_00650_w001",
+      "nexar_train_00418_w000",
+      "nexar_train_00366_w001"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 24
+    },
+    "triggering_hist": {
+      "none": 23,
+      "occluding_object": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 24
+    },
+    "illumination_hist": {
+      "night": 24
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M031",
+    "name": "Glare closing/interaction conflict with car",
+    "description": "20 events. Dominant root cause AGENT_BEHAVIOR; actor car; context glare. Example: The ego vehicle is following a dark sedan and a light SUV in the same lane, with a closing conflict indicated by high ego-path looming and a",
+    "size": 20,
+    "severity": 0.485,
+    "rank_score": 19.695,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00015_w000",
+      "nexar_train_00128_w001",
+      "nexar_train_00131_w000",
+      "nexar_train_00493_w000",
+      "nexar_train_00506_w001",
+      "nexar_train_00747_w000",
+      "nexar_train_00877_w000",
+      "nexar_train_00979_w000",
+      "nexar_train_00015_w001",
+      "nexar_train_00031_w000",
+      "nexar_train_00506_w002",
+      "nexar_train_00609_w001",
+      "nexar_train_00664_w002",
+      "nexar_train_00740_w000",
+      "nexar_train_00751_w000",
+      "nexar_train_00128_w000",
+      "nexar_train_00313_w000",
+      "nexar_train_00363_w000",
+      "nexar_train_00604_w000",
+      "nexar_train_00783_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00740_w000",
+      "nexar_train_00783_w000",
+      "nexar_train_00015_w001",
+      "nexar_train_00609_w001",
+      "nexar_train_00664_w002"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 20
+    },
+    "triggering_hist": {
+      "none": 20
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 19,
+      "unknown": 1
+    },
+    "illumination_hist": {
+      "glare": 17,
+      "dusk_dawn": 3
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M033",
+    "name": "Dusk_dawn closing/interaction conflict with car",
+    "description": "14 events. Dominant root cause AGENT_BEHAVIOR; actor car; context dusk_dawn. Example: A white sedan (actor 1) is turning left at an intersection with a red traffic signal, creating an imminent collision risk with the ego vehic",
+    "size": 14,
+    "severity": 0.535,
+    "rank_score": 14.492,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00284_w000",
+      "nexar_train_00351_w002",
+      "nexar_train_00709_w000",
+      "nexar_train_00557_w001",
+      "nexar_train_00710_w000",
+      "nexar_train_00710_w001",
+      "nexar_train_00661_w001",
+      "nexar_train_00690_w000",
+      "nexar_train_00820_w002",
+      "nexar_train_00082_w000",
+      "nexar_train_00284_w001",
+      "nexar_train_00351_w001",
+      "nexar_train_00712_w000",
+      "nexar_train_00937_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00709_w000",
+      "nexar_train_00284_w000",
+      "nexar_train_00351_w002",
+      "nexar_train_00284_w001",
+      "nexar_train_00820_w002"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 14
+    },
+    "triggering_hist": {
+      "none": 14
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 14
+    },
+    "illumination_hist": {
+      "dusk_dawn": 14
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M019",
+    "name": "Clear daytime closing/interaction conflict with pedestrian",
+    "description": "12 events. Dominant root cause AGENT_BEHAVIOR; actor pedestrian; context clear daytime. Example: A white SUV is directly ahead, with a closing conflict imminent due to low TTC and high ego-path looming, posing a high risk of collision.",
+    "size": 12,
+    "severity": 0.649,
+    "rank_score": 13.787,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00078_w000",
+      "nexar_train_00129_w001",
+      "nexar_train_00566_w000",
+      "nexar_train_00568_w000",
+      "nexar_train_00789_w000",
+      "nexar_train_00913_w001",
+      "nexar_train_00916_w000",
+      "nexar_train_00957_w000",
+      "nexar_train_00016_w002",
+      "nexar_train_00394_w000",
+      "nexar_train_00520_w000",
+      "nexar_train_00857_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00789_w000",
+      "nexar_train_00129_w001",
+      "nexar_train_00857_w000",
+      "nexar_train_00078_w000",
+      "nexar_train_00916_w000"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 12
+    },
+    "triggering_hist": {
+      "none": 12
+    },
+    "ncap_hist": {
+      "AEB_cyclist": 2
+    },
+    "weather_hist": {
+      "clear": 12
+    },
+    "illumination_hist": {
+      "day": 12
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M022",
+    "name": "Night closing/interaction conflict with other",
+    "description": "11 events. Dominant root cause AGENT_BEHAVIOR; actor other; context night. Example: A pedestrian in a high-visibility vest stands in the road, directing traffic, while vehicles are stationary. The scene shows no movement, bu",
+    "size": 11,
+    "severity": 0.584,
+    "rank_score": 11.926,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00071_w001",
+      "nexar_train_00308_w001",
+      "nexar_train_00408_w001",
+      "nexar_train_00630_w001",
+      "nexar_train_00656_w001",
+      "nexar_train_00690_w001",
+      "nexar_train_00695_w001",
+      "nexar_train_00722_w000",
+      "nexar_train_00809_w002",
+      "nexar_train_00942_w000",
+      "nexar_train_00947_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00947_w000",
+      "nexar_train_00656_w001",
+      "nexar_train_00809_w002",
+      "nexar_train_00630_w001",
+      "nexar_train_00690_w001"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 11
+    },
+    "triggering_hist": {
+      "none": 11
+    },
+    "ncap_hist": {
+      "AEB_cyclist": 2
+    },
+    "weather_hist": {
+      "unknown": 11
+    },
+    "illumination_hist": {
+      "night": 9,
+      "dusk_dawn": 2
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M028",
+    "name": "Night closing/interaction conflict with truck",
+    "description": "12 events. Dominant root cause AGENT_BEHAVIOR; actor truck; context night. Example: A white pickup truck is turning right at an intersection while the camera vehicle is following closely, creating an imminent collision risk ",
+    "size": 12,
+    "severity": 0.455,
+    "rank_score": 11.455,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00483_w001",
+      "nexar_train_00929_w002",
+      "nexar_train_00930_w000",
+      "nexar_train_00405_w000",
+      "nexar_train_00606_w001",
+      "nexar_train_00629_w001",
+      "nexar_train_00633_w001",
+      "nexar_train_00773_w001",
+      "nexar_train_00838_w001",
+      "nexar_train_00898_w001",
+      "nexar_train_00932_w000",
+      "nexar_train_00932_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00930_w000",
+      "nexar_train_00929_w002",
+      "nexar_train_00483_w001",
+      "nexar_train_00898_w001",
+      "nexar_train_00773_w001"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 12
+    },
+    "triggering_hist": {
+      "none": 12
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 12
+    },
+    "illumination_hist": {
+      "night": 12
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M001",
+    "name": "Rain night occluded-actor emergence with car",
+    "description": "13 events. Dominant root cause DYNAMIC_OCCLUSION; actor car; context rain night. Example: A vehicle is following another car at night on a wet road, with the rear car's brake lights clearly visible. The safety relevance lies in th",
+    "size": 13,
+    "severity": 0.28,
+    "rank_score": 10.139,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00003_w000",
+      "nexar_train_00048_w001",
+      "nexar_train_00066_w000",
+      "nexar_train_00114_w002",
+      "nexar_train_00473_w001",
+      "nexar_train_00487_w001",
+      "nexar_train_00634_w001",
+      "nexar_train_00058_w001",
+      "nexar_train_00076_w000",
+      "nexar_train_00103_w001",
+      "nexar_train_00106_w001",
+      "nexar_train_00330_w002",
+      "nexar_train_00353_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00103_w001",
+      "nexar_train_00330_w002",
+      "nexar_train_00058_w001",
+      "nexar_train_00076_w000",
+      "nexar_train_00114_w002"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 13
+    },
+    "triggering_hist": {
+      "none": 12,
+      "occluding_object": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 13
+    },
+    "illumination_hist": {
+      "night": 13
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M007",
+    "name": "Clear daytime perception blind spot with truck",
+    "description": "11 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor truck; context clear daytime. Example: The dashcam's perception system exhibits an epistemic perception gap due to a short track continuity gap and low confidence, causing a tempo",
+    "size": 11,
+    "severity": 0.381,
+    "rank_score": 9.688,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00388_w002",
+      "nexar_train_00623_w000",
+      "nexar_train_00923_w001",
+      "nexar_train_00938_w001",
+      "nexar_train_01031_w000",
+      "nexar_train_00300_w001",
+      "nexar_train_00486_w002",
+      "nexar_train_00526_w000",
+      "nexar_train_00528_w001",
+      "nexar_train_00678_w002",
+      "nexar_train_00905_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00486_w002",
+      "nexar_train_00678_w002",
+      "nexar_train_00526_w000",
+      "nexar_train_00528_w001",
+      "nexar_train_00300_w001"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 11
+    },
+    "triggering_hist": {
+      "none": 11
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 10,
+      "unknown": 1
+    },
+    "illumination_hist": {
+      "day": 10,
+      "dusk_dawn": 1
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M032",
+    "name": "Tunnel closing/interaction conflict with car",
+    "description": "10 events. Dominant root cause AGENT_BEHAVIOR; actor car; context tunnel. Example: A white SUV is parked in a ticketing lane, creating an imminent collision risk as the ego vehicle approaches. The SUV's position and the ego",
+    "size": 10,
+    "severity": 0.424,
+    "rank_score": 9.238,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00010_w000",
+      "nexar_train_00700_w000",
+      "nexar_train_00762_w001",
+      "nexar_train_00784_w000",
+      "nexar_train_00784_w001",
+      "nexar_train_00820_w003",
+      "nexar_train_00702_w002",
+      "nexar_train_00712_w001",
+      "nexar_train_00739_w000",
+      "nexar_train_00822_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00010_w000",
+      "nexar_train_00784_w001",
+      "nexar_train_00700_w000",
+      "nexar_train_00762_w001",
+      "nexar_train_00820_w003"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 10
+    },
+    "triggering_hist": {
+      "none": 10
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 10
+    },
+    "illumination_hist": {
+      "tunnel": 5,
+      "dusk_dawn": 5
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M020",
+    "name": "Night occluded-actor emergence with truck",
+    "description": "9 events. Dominant root cause DYNAMIC_OCCLUSION; actor truck; context night. Example: A white truck is partially occluded by a vehicle in the adjacent lane, creating a dynamic occlusion hazard as it approaches the ego vehicle.",
+    "size": 9,
+    "severity": 0.39,
+    "rank_score": 8.01,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00283_w000",
+      "nexar_train_00291_w000",
+      "nexar_train_00411_w002",
+      "nexar_train_00453_w002",
+      "nexar_train_00485_w000",
+      "nexar_train_00567_w000",
+      "nexar_train_00748_w000",
+      "nexar_train_01022_w000",
+      "nexar_train_01022_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00411_w002",
+      "nexar_train_00485_w000",
+      "nexar_train_00291_w000",
+      "nexar_train_01022_w001",
+      "nexar_train_00748_w000"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 9
+    },
+    "triggering_hist": {
+      "none": 7,
+      "occluding_object": 2
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 9
+    },
+    "illumination_hist": {
+      "night": 6,
+      "day": 1,
+      "dusk_dawn": 2
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M017",
+    "name": "Clear daytime occluded-actor emergence with truck",
+    "description": "8 events. Dominant root cause DYNAMIC_OCCLUSION; actor truck; context clear daytime. Example: A primary vehicle (truck) emerges from behind an occluder, causing a dynamic occlusion event that temporarily reduces perception clarity. No",
+    "size": 8,
+    "severity": 0.317,
+    "rank_score": 6.533,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00043_w000",
+      "nexar_train_00339_w001",
+      "nexar_train_00500_w000",
+      "nexar_train_00530_w000",
+      "nexar_train_00757_w000",
+      "nexar_train_00883_w001",
+      "nexar_train_01028_w000",
+      "nexar_train_00303_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00303_w001",
+      "nexar_train_00883_w001",
+      "nexar_train_00757_w000",
+      "nexar_train_00339_w001",
+      "nexar_train_00500_w000"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 8
+    },
+    "triggering_hist": {
+      "none": 8
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 8
+    },
+    "illumination_hist": {
+      "day": 7,
+      "dusk_dawn": 1
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M000",
+    "name": "Rain night perception blind spot with car",
+    "description": "7 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor car; context rain night. Example: A red car with a bicycle rack is stopped at an intersection at night, with its brake lights illuminated. The scene is safety-relevant due to",
+    "size": 7,
+    "severity": 0.392,
+    "rank_score": 6.243,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00003_w001",
+      "nexar_train_00100_w000",
+      "nexar_train_00691_w000",
+      "nexar_train_00798_w000",
+      "nexar_train_00810_w002",
+      "nexar_train_00376_w001",
+      "nexar_train_00618_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00618_w001",
+      "nexar_train_00003_w001",
+      "nexar_train_00810_w002",
+      "nexar_train_00691_w000",
+      "nexar_train_00376_w001"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 7
+    },
+    "triggering_hist": {
+      "none": 6,
+      "low_light": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 7
+    },
+    "illumination_hist": {
+      "night": 7
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M014",
+    "name": "Rain closing/interaction conflict with truck",
+    "description": "6 events. Dominant root cause AGENT_BEHAVIOR; actor truck; context rain. Example: A silver pickup truck is moving slowly in the left lane, creating an imminent closing conflict with the ego vehicle, which is approaching it",
+    "size": 6,
+    "severity": 0.526,
+    "rank_score": 6.157,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00065_w000",
+      "nexar_train_00362_w001",
+      "nexar_train_00398_w001",
+      "nexar_train_00593_w000",
+      "nexar_train_00709_w001",
+      "nexar_train_00903_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00362_w001",
+      "nexar_train_00709_w001",
+      "nexar_train_00398_w001",
+      "nexar_train_00593_w000",
+      "nexar_train_00903_w001"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 6
+    },
+    "triggering_hist": {
+      "none": 6
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 6
+    },
+    "illumination_hist": {
+      "day": 4,
+      "dusk_dawn": 2
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M011",
+    "name": "Night perception blind spot with pedestrian",
+    "description": "6 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor pedestrian; context night. Example: The system's perception of the primary truck is unstable due to low confidence and track dropouts, creating a safety gap despite clear visua",
+    "size": 6,
+    "severity": 0.52,
+    "rank_score": 6.119,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00408_w000",
+      "nexar_train_00433_w001",
+      "nexar_train_00522_w000",
+      "nexar_train_00522_w001",
+      "nexar_train_00669_w000",
+      "nexar_train_00842_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00669_w000",
+      "nexar_train_00408_w000",
+      "nexar_train_00433_w001",
+      "nexar_train_00842_w000",
+      "nexar_train_00522_w000"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 6
+    },
+    "triggering_hist": {
+      "none": 5,
+      "low_light": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 6
+    },
+    "illumination_hist": {
+      "night": 5,
+      "dusk_dawn": 1
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M002",
+    "name": "Rain perception blind spot with car",
+    "description": "6 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor car; context rain. Example: A bus is visible in the right lane, but the perception system's track for the primary actor (a vehicle ahead) is unstable due to low confide",
+    "size": 6,
+    "severity": 0.438,
+    "rank_score": 5.629,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00121_w002",
+      "nexar_train_00510_w001",
+      "nexar_train_00965_w001",
+      "nexar_train_00044_w001",
+      "nexar_train_00081_w000",
+      "nexar_train_00882_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00044_w001",
+      "nexar_train_00081_w000",
+      "nexar_train_00121_w002",
+      "nexar_train_00882_w001",
+      "nexar_train_00510_w001"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 6
+    },
+    "triggering_hist": {
+      "none": 5,
+      "occluding_object": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 6
+    },
+    "illumination_hist": {
+      "day": 6
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M013",
+    "name": "Night optical-limit miss with other",
+    "description": "6 events. Dominant root cause ALEATORY_OPTICAL; actor other; context night. Example: The dashcam system failed to detect a primary actor due to extreme low-light conditions, triggering an ALEATORY_OPTICAL failure. This is saf",
+    "size": 6,
+    "severity": 0.375,
+    "rank_score": 5.252,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00429_w000",
+      "nexar_train_00583_w000",
+      "nexar_train_00742_w000",
+      "nexar_train_00929_w001",
+      "nexar_train_00487_w000",
+      "nexar_train_00978_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00978_w000",
+      "nexar_train_00929_w001",
+      "nexar_train_00583_w000",
+      "nexar_train_00487_w000",
+      "nexar_train_00429_w000"
+    ],
+    "attribution_hist": {
+      "ALEATORY_OPTICAL": 6
+    },
+    "triggering_hist": {
+      "none": 6
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 6
+    },
+    "illumination_hist": {
+      "night": 6
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M003",
+    "name": "Rain occluded-actor emergence with car",
+    "description": "6 events. Dominant root cause DYNAMIC_OCCLUSION; actor car; context rain. Example: A black SUV turns left at an intersection while the dashcam vehicle approaches, but the SUV is occluded by a passing object, causing a tempo",
+    "size": 6,
+    "severity": 0.346,
+    "rank_score": 5.076,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00005_w000",
+      "nexar_train_00333_w001",
+      "nexar_train_00478_w001",
+      "nexar_train_00613_w001",
+      "nexar_train_00705_w001",
+      "nexar_train_00611_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00611_w001",
+      "nexar_train_00705_w001",
+      "nexar_train_00333_w001",
+      "nexar_train_00005_w000",
+      "nexar_train_00613_w001"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 6
+    },
+    "triggering_hist": {
+      "none": 6
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 6
+    },
+    "illumination_hist": {
+      "day": 6
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M016",
+    "name": "Clear daytime occluded-actor emergence with other",
+    "description": "6 events. Dominant root cause DYNAMIC_OCCLUSION; actor other; context clear daytime. Example: A pedestrian is partially occluded by a utility pole and debris, creating a dynamic occlusion that could confuse perception systems. The veh",
+    "size": 6,
+    "severity": 0.321,
+    "rank_score": 4.926,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00395_w000",
+      "nexar_train_00443_w000",
+      "nexar_train_00602_w000",
+      "nexar_train_00923_w000",
+      "nexar_train_00967_w001",
+      "nexar_train_00697_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00395_w000",
+      "nexar_train_00602_w000",
+      "nexar_train_00697_w000",
+      "nexar_train_00967_w001",
+      "nexar_train_00443_w000"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 6
+    },
+    "triggering_hist": {
+      "none": 4,
+      "occluding_object": 2
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 5,
+      "unknown": 1
+    },
+    "illumination_hist": {
+      "day": 6
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M008",
+    "name": "Clear daytime optical-limit miss with other",
+    "description": "6 events. Dominant root cause ALEATORY_OPTICAL; actor other; context clear daytime. Example: The dashcam experienced severe optical glare from the sun, causing complete loss of visibility for the primary actor and rendering the scene",
+    "size": 6,
+    "severity": 0.228,
+    "rank_score": 4.365,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00459_w000",
+      "nexar_train_00459_w001",
+      "nexar_train_00597_w000",
+      "nexar_train_00597_w001",
+      "nexar_train_00358_w002",
+      "nexar_train_00635_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00358_w002",
+      "nexar_train_00459_w000",
+      "nexar_train_00459_w001",
+      "nexar_train_00597_w000",
+      "nexar_train_00597_w001"
+    ],
+    "attribution_hist": {
+      "ALEATORY_OPTICAL": 6
+    },
+    "triggering_hist": {
+      "none": 6
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 5,
+      "unknown": 1
+    },
+    "illumination_hist": {
+      "day": 5,
+      "glare": 1
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M026",
+    "name": "Rain dusk_dawn closing/interaction conflict with car",
+    "description": "5 events. Dominant root cause AGENT_BEHAVIOR; actor car; context rain dusk_dawn. Example: A white SUV is turning left at a wet urban intersection, creating an imminent closing conflict with the ego vehicle, which is stopped behind",
+    "size": 5,
+    "severity": 0.356,
+    "rank_score": 4.281,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00353_w000",
+      "nexar_train_00454_w000",
+      "nexar_train_00901_w001",
+      "nexar_train_00903_w000",
+      "nexar_train_00901_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00903_w000",
+      "nexar_train_00901_w001",
+      "nexar_train_00353_w000",
+      "nexar_train_00454_w000",
+      "nexar_train_00901_w000"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 5
+    },
+    "triggering_hist": {
+      "none": 5
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 5
+    },
+    "illumination_hist": {
+      "dusk_dawn": 3,
+      "night": 2
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M012",
+    "name": "Rain night closing/interaction conflict with other",
+    "description": "4 events. Dominant root cause AGENT_BEHAVIOR; actor other; context rain night. Example: A pedestrian is crossing the street at an intersection at night, with the ego vehicle approaching at high speed and imminent collision risk ",
+    "size": 4,
+    "severity": 0.561,
+    "rank_score": 4.244,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00328_w002",
+      "nexar_train_00474_w001",
+      "nexar_train_00546_w002",
+      "nexar_train_00563_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00328_w002",
+      "nexar_train_00546_w002",
+      "nexar_train_00563_w000",
+      "nexar_train_00474_w001"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 4
+    },
+    "triggering_hist": {
+      "none": 4
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 4
+    },
+    "illumination_hist": {
+      "night": 3,
+      "dusk_dawn": 1
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M006",
+    "name": "Rain occluded-actor emergence with pedestrian",
+    "description": "3 events. Dominant root cause DYNAMIC_OCCLUSION; actor pedestrian; context rain. Example: A pedestrian with an umbrella and a bicycle are visible on the sidewalk, but the dashcam's perception system fails to detect them due to opt",
+    "size": 3,
+    "severity": 0.762,
+    "rank_score": 3.785,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00025_w001",
+      "nexar_train_00523_w002",
+      "nexar_train_00677_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00523_w002",
+      "nexar_train_00025_w001",
+      "nexar_train_00677_w001"
+    ],
+    "attribution_hist": {
+      "ALEATORY_OPTICAL": 1,
+      "DYNAMIC_OCCLUSION": 2
+    },
+    "triggering_hist": {
+      "none": 3
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 3
+    },
+    "illumination_hist": {
+      "day": 3
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M010",
+    "name": "Night perception blind spot with other",
+    "description": "4 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor other; context night. Example: The vehicle is stationary at a red light with unstable perception of the traffic signal due to low confidence and poor lighting conditions, ",
+    "size": 4,
+    "severity": 0.44,
+    "rank_score": 3.758,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00356_w001",
+      "nexar_train_00461_w001",
+      "nexar_train_00723_w000",
+      "nexar_train_00793_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00723_w000",
+      "nexar_train_00461_w001",
+      "nexar_train_00793_w001",
+      "nexar_train_00356_w001"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 4
+    },
+    "triggering_hist": {
+      "none": 3,
+      "low_light": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 4
+    },
+    "illumination_hist": {
+      "night": 4
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M015",
+    "name": "Rain night closing/interaction conflict with truck",
+    "description": "4 events. Dominant root cause AGENT_BEHAVIOR; actor truck; context rain night. Example: A truck is directly ahead in the same lane, approaching an intersection at night with green traffic lights. The imminent closing conflict (T",
+    "size": 4,
+    "severity": 0.387,
+    "rank_score": 3.55,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00089_w000",
+      "nexar_train_00723_w001",
+      "nexar_train_00755_w001",
+      "nexar_train_01008_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00723_w001",
+      "nexar_train_00755_w001",
+      "nexar_train_01008_w000",
+      "nexar_train_00089_w000"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 4
+    },
+    "triggering_hist": {
+      "none": 4
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 4
+    },
+    "illumination_hist": {
+      "night": 4
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M009",
+    "name": "Night optical-limit miss with car",
+    "description": "4 events. Dominant root cause ALEATORY_OPTICAL; actor car; context night. Example: The dashcam experienced severe optical glare from an overhead light, causing temporary loss of visibility for the primary actor (a white car",
+    "size": 4,
+    "severity": 0.321,
+    "rank_score": 3.286,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00307_w001",
+      "nexar_train_00345_w000",
+      "nexar_train_00588_w001",
+      "nexar_train_00972_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00972_w001",
+      "nexar_train_00588_w001",
+      "nexar_train_00307_w001",
+      "nexar_train_00345_w000"
+    ],
+    "attribution_hist": {
+      "ALEATORY_OPTICAL": 4
+    },
+    "triggering_hist": {
+      "none": 4
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 4
+    },
+    "illumination_hist": {
+      "night": 4
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M046",
+    "name": "Clear daytime closing/interaction conflict with bus",
+    "description": "3 events. Dominant root cause AGENT_BEHAVIOR; actor bus; context clear daytime. Example: A bus and a black SUV are approaching an intersection with green traffic lights, creating an imminent closing conflict with a short time-to-",
+    "size": 3,
+    "severity": 0.477,
+    "rank_score": 2.93,
+    "iso_21448_area": "AREA_2_KNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00556_w000",
+      "nexar_train_00670_w001",
+      "nexar_train_00970_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00556_w000",
+      "nexar_train_00670_w001",
+      "nexar_train_00970_w001"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 3
+    },
+    "triggering_hist": {
+      "none": 3
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 3
+    },
+    "illumination_hist": {
+      "day": 3
+    },
+    "noise": false
+  },
+  {
+    "cluster_id": "M044",
+    "name": "Night perception blind spot with truck",
+    "description": "2 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor truck; context night. Example: The dashcam vehicle experiences a brief loss of focus on the trailing truck, causing motion blur and unstable tracking, which could lead to ",
+    "size": 2,
+    "severity": 0.735,
+    "rank_score": 2.47,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00485_w001",
+      "nexar_train_00793_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00793_w000",
+      "nexar_train_00485_w001"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 2
+    },
+    "triggering_hist": {
+      "none": 2
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 2
+    },
+    "illumination_hist": {
+      "night": 2
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M036",
+    "name": "Dusk_dawn closing/interaction conflict with other",
+    "description": "2 events. Dominant root cause AGENT_BEHAVIOR; actor other; context dusk_dawn. Example: A cyclist is approaching the vehicle from the left in a stop-controlled intersection, creating an imminent collision risk due to low time-to",
+    "size": 2,
+    "severity": 0.561,
+    "rank_score": 2.122,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00055_w001",
+      "nexar_train_00664_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00664_w001",
+      "nexar_train_00055_w001"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 2
+    },
+    "triggering_hist": {
+      "none": 2
+    },
+    "ncap_hist": {
+      "AEB_cyclist": 1
+    },
+    "weather_hist": {
+      "clear": 2
+    },
+    "illumination_hist": {
+      "dusk_dawn": 2
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M039",
+    "name": "Dusk_dawn perception blind spot with car",
+    "description": "2 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor car; context dusk_dawn. Example: A parked car is detected with low confidence due to epistemic perception gap, despite being clearly visible in the scene, indicating a poten",
+    "size": 2,
+    "severity": 0.329,
+    "rank_score": 1.658,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00131_w001",
+      "nexar_train_00757_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00757_w001",
+      "nexar_train_00131_w001"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 2
+    },
+    "triggering_hist": {
+      "none": 2
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 2
+    },
+    "illumination_hist": {
+      "dusk_dawn": 2
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M047",
+    "name": "Clear daytime occluded-actor emergence with pedestrian",
+    "description": "1 events. Dominant root cause DYNAMIC_OCCLUSION; actor pedestrian; context clear daytime. Example: A pedestrian is temporarily occluded by another pedestrian as they cross the street, creating a dynamic occlusion that could confuse percept",
+    "size": 1,
+    "severity": 1.0,
+    "rank_score": 1.5,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00566_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00566_w001"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 1
+    },
+    "illumination_hist": {
+      "day": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M055",
+    "name": "Fog night occluded-actor emergence with car",
+    "description": "1 events. Dominant root cause DYNAMIC_OCCLUSION; actor car; context fog night. Example: A parked vehicle partially occludes the primary actor, causing a dynamic occlusion event during forward motion. This reduces perception conf",
+    "size": 1,
+    "severity": 0.729,
+    "rank_score": 1.229,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_01012_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_01012_w001"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "fog": 1
+    },
+    "illumination_hist": {
+      "night": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M040",
+    "name": "Fog glare occluded-actor emergence with truck",
+    "description": "1 events. Dominant root cause DYNAMIC_OCCLUSION; actor truck; context fog glare. Example: A truck (actor 1) emerges from behind an occluder, causing a dynamic occlusion event that temporarily obscures its presence, which is safety",
+    "size": 1,
+    "severity": 0.7,
+    "rank_score": 1.2,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00313_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00313_w001"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "fog": 1
+    },
+    "illumination_hist": {
+      "glare": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M038",
+    "name": "Rain night perception blind spot with truck",
+    "description": "1 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor truck; context rain night. Example: A perception gap occurs due to unstable tracking of a truck, causing a temporary loss of confidence in its presence, which could lead to a f",
+    "size": 1,
+    "severity": 0.662,
+    "rank_score": 1.162,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00103_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00103_w000"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 1
+    },
+    "illumination_hist": {
+      "night": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M041",
+    "name": "Dusk_dawn closing/interaction conflict with truck",
+    "description": "1 events. Dominant root cause AGENT_BEHAVIOR; actor truck; context dusk_dawn. Example: A vehicle is approaching the ego vehicle at high speed on a highway, with a short time-to-collision (TTC 0.6s) and significant looming path,",
+    "size": 1,
+    "severity": 0.607,
+    "rank_score": 1.107,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00383_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00383_w000"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 1
+    },
+    "illumination_hist": {
+      "dusk_dawn": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M035",
+    "name": "Glare closing/interaction conflict with truck",
+    "description": "1 events. Dominant root cause AGENT_BEHAVIOR; actor truck; context glare. Example: The ego vehicle is approaching a parked truck with imminent collision risk due to low TTC and high looming speed, despite stable perception ",
+    "size": 1,
+    "severity": 0.601,
+    "rank_score": 1.101,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00055_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00055_w000"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 1
+    },
+    "illumination_hist": {
+      "glare": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M050",
+    "name": "Clear daytime perception blind spot with other",
+    "description": "1 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor other; context clear daytime. Example: The dashcam vehicle is following a white van in traffic, but perception confidence is low due to an epistemic gap, despite clear visual evid",
+    "size": 1,
+    "severity": 0.593,
+    "rank_score": 1.093,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00795_w002"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00795_w002"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 1
+    },
+    "illumination_hist": {
+      "day": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M048",
+    "name": "Rain closing/interaction conflict with other",
+    "description": "1 events. Dominant root cause AGENT_BEHAVIOR; actor other; context rain. Example: A white van is approaching the ego vehicle at a very close range, with imminent collision risk due to low TTC and high ego-path looming, ind",
+    "size": 1,
+    "severity": 0.582,
+    "rank_score": 1.082,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00593_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00593_w001"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 1
+    },
+    "illumination_hist": {
+      "day": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M054",
+    "name": "Fog night closing/interaction conflict with car",
+    "description": "1 events. Dominant root cause AGENT_BEHAVIOR; actor car; context fog night. Example: A dark SUV is approaching a parked car at a very close range, with imminent collision risk indicated by high ego-path looming and minimal TT",
+    "size": 1,
+    "severity": 0.532,
+    "rank_score": 1.032,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_01012_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_01012_w000"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "fog": 1
+    },
+    "illumination_hist": {
+      "night": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M042",
+    "name": "Snow closing/interaction conflict with car",
+    "description": "1 events. Dominant root cause AGENT_BEHAVIOR; actor car; context snow. Example: A red SUV is stopped directly ahead at a red light, with the ego vehicle approaching at high looming speed (1.90/s) and a short TTC (1.1s), ",
+    "size": 1,
+    "severity": 0.515,
+    "rank_score": 1.015,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00424_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00424_w000"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "snow": 1
+    },
+    "illumination_hist": {
+      "day": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M053",
+    "name": "Clear daytime perception blind spot with pedestrian",
+    "description": "1 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor pedestrian; context clear daytime. Example: A pedestrian crossing event is captured with unstable tracking and low confidence, indicating a potential safety gap in perception due to fo",
+    "size": 1,
+    "severity": 0.487,
+    "rank_score": 0.987,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00986_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00986_w000"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 1
+    },
+    "illumination_hist": {
+      "day": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M052",
+    "name": "Clear daytime perception blind spot with bus",
+    "description": "1 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor bus; context clear daytime. Example: A yellow bus (actor 1) is detected with low confidence and intermittent tracking, creating a perception gap that could lead to missed collis",
+    "size": 1,
+    "severity": 0.486,
+    "rank_score": 0.986,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00977_w002"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00977_w002"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 1
+    },
+    "illumination_hist": {
+      "day": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M049",
+    "name": "Clear daytime perception blind spot with traffic_light",
+    "description": "1 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor traffic_light; context clear daytime. Example: A traffic light with a left-turn arrow signal is visible, but the perception system's track for this object is unstable with a 2-frame gap, ",
+    "size": 1,
+    "severity": 0.46,
+    "rank_score": 0.96,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00661_w002"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00661_w002"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 1
+    },
+    "illumination_hist": {
+      "day": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M043",
+    "name": "Glare occluded-actor emergence with car",
+    "description": "1 events. Dominant root cause DYNAMIC_OCCLUSION; actor car; context glare, trigger: glare. Example: A dark SUV is partially occluded by glare from the sun, causing a temporary loss of visibility for the perception system. The SUV is not an ",
+    "size": 1,
+    "severity": 0.45,
+    "rank_score": 0.95,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00469_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00469_w000"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 1
+    },
+    "triggering_hist": {
+      "glare": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 1
+    },
+    "illumination_hist": {
+      "glare": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M051",
+    "name": "Night occluded-actor emergence with pedestrian",
+    "description": "1 events. Dominant root cause DYNAMIC_OCCLUSION; actor pedestrian; context night, trigger: occluding_object. Example: A pedestrian is occluded by a vehicle in the crosswalk, creating a dynamic occlusion hazard that could lead to a collision if not detected. ",
+    "size": 1,
+    "severity": 0.45,
+    "rank_score": 0.95,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00909_w002"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00909_w002"
+    ],
+    "attribution_hist": {
+      "DYNAMIC_OCCLUSION": 1
+    },
+    "triggering_hist": {
+      "occluding_object": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "unknown": 1
+    },
+    "illumination_hist": {
+      "night": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M045",
+    "name": "Clear daytime optical-limit miss with car",
+    "description": "1 events. Dominant root cause ALEATORY_OPTICAL; actor car; context clear daytime. Example: The dashcam vehicle's perception system failed to detect any actor in a critical crop due to occlusion by the windshield and dashboard, trig",
+    "size": 1,
+    "severity": 0.416,
+    "rank_score": 0.916,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00529_w001"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00529_w001"
+    ],
+    "attribution_hist": {
+      "ALEATORY_OPTICAL": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 1
+    },
+    "illumination_hist": {
+      "day": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M034",
+    "name": "Rain closing/interaction conflict with bus",
+    "description": "1 events. Dominant root cause AGENT_BEHAVIOR; actor bus; context rain. Example: A bus is stationary or moving very slowly on the right, creating an imminent closing conflict with the ego vehicle approaching at 1.21/s pat",
+    "size": 1,
+    "severity": 0.344,
+    "rank_score": 0.844,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00025_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00025_w000"
+    ],
+    "attribution_hist": {
+      "AGENT_BEHAVIOR": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "rain": 1
+    },
+    "illumination_hist": {
+      "day": 1
+    },
+    "noise": true
+  },
+  {
+    "cluster_id": "M037",
+    "name": "Glare perception blind spot with car",
+    "description": "1 events. Dominant root cause EPISTEMIC_PERCEPTION_GAP; actor car; context glare. Example: A vehicle is detected with low confidence and intermittent tracking due to a perception gap, despite being clearly visible in the scene. Thi",
+    "size": 1,
+    "severity": 0.239,
+    "rank_score": 0.739,
+    "iso_21448_area": "AREA_3_UNKNOWN_HAZARDOUS",
+    "member_clip_ids": [
+      "nexar_train_00056_w000"
+    ],
+    "representative_clip_ids": [
+      "nexar_train_00056_w000"
+    ],
+    "attribution_hist": {
+      "EPISTEMIC_PERCEPTION_GAP": 1
+    },
+    "triggering_hist": {
+      "none": 1
+    },
+    "ncap_hist": {},
+    "weather_hist": {
+      "clear": 1
+    },
+    "illumination_hist": {
+      "glare": 1
+    },
+    "noise": true
+  }
+]

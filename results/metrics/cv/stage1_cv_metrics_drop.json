@@ -1,0 +1,48 @@
+{
+  "recall": {
+    "value": 0.92,
+    "ci95": [
+      0.8989236712417646,
+      0.9401031637855809
+    ]
+  },
+  "early_recall_before_alert": {
+    "value": 0.7353846153846154,
+    "ci95": [
+      0.7022194384386139,
+      0.76853771411061
+    ]
+  },
+  "median_lead_time_s": {
+    "value": 2.6734411764705914,
+    "ci95": [
+      2.6000000000000014,
+      2.768941176470591
+    ]
+  },
+  "negative_windows_per_minute": {
+    "value": 1.82564599176403,
+    "ci95": [
+      1.707959175396999,
+      1.9403790043146734
+    ]
+  },
+  "compression": {
+    "value": 0.7619719581344894,
+    "ci95": [
+      0.7539318828465035,
+      0.7701631278293212
+    ]
+  },
+  "_meta": {
+    "kind": "cross_validated_out_of_fold",
+    "threshold": 0.6,
+    "folds": 5,
+    "n_clips": 1300,
+    "step_auc": 0.9167986549923917,
+    "causal": false,
+    "n_features": 26,
+    "dropped": "markers",
+    "raw_levels": true
+  }
+}

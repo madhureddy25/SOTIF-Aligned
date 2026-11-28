@@ -1,0 +1,34 @@
+{
+  "cards": 1142,
+  "attribution": {
+    "INCONCLUSIVE": 286,
+    "DYNAMIC_OCCLUSION": 118,
+    "EPISTEMIC_PERCEPTION_GAP": 102,
+    "AGENT_BEHAVIOR": 618,
+    "ALEATORY_OPTICAL": 18
+  },
+  "status": {
+    "accepted": 1121,
+    "needs_review": 21
+  },
+  "iso_area": {
+    "AREA_3_UNKNOWN_HAZARDOUS": 1142
+  },
+  "repaired": 51,
+  "coerced": 0,
+  "first_draft_critic_rules": {
+    "actor_class": 38,
+    "visibility": 9,
+    "occlusion": 1,
+    "text_vs_label": 2,
+    "citations": 1,
+    "weather": 1
+  },
+  "vlm": {
+    "calls": 3360,
+    "invalid_json_first_try": 1,
+    "failures": 0,
+    "json_validity": 0.999702380952381,
+    "mean_s": 10.16310028490566
+  }
+}
