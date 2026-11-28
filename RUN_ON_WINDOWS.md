@@ -238,7 +238,24 @@ sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar --no-raw
 sotif-miner train-stage1 --run runs\nexar_v6 --root D:\data\nexar --drop markers --no-raw
 ```
 
-## Blind false-alarm review (is it the model or the labels?)
+## Step 1, automatic: are the false alarms real close calls? (GPU, no manual review)
+One command cuts the clips, runs the blind VLM judge (no telemetry), scores it and prints the decision.
+The judge is validated on the arms whose answer is known: labelled near-miss windows (it must call them close
+calls) and unflagged normal windows (it should not). If it fails, the command says its verdicts are not usable.
+Otherwise the false-alarm close-call share is corrected for the judge's own error rates (Rogan-Gladen) and the
+judge's cause tags decide Step 2. Resumable: rerun the same command after a stop.
+```
+pip install -e ".[review]"
+sotif-miner audit-false-alarms --run runs\nexar_heldout_v6_drop
+```
+If it reports the judge is not reliable, retry with the larger model (`ollama pull qwen3-vl:8b-instruct` once);
+the clips are reused and only the judging restarts:
+```
+sotif-miner audit-false-alarms --run runs\nexar_heldout_v6_drop --config configs\vlm8b.yaml
+```
+Result: `runs\nexar_heldout_v6_drop\false_alarm_audit.json`.
+
+### Optional: human review of the same clips
 Three arms on real video, shuffled and blinded: every window the model fired on the held-out normal clips
 (false alarms), random windows of the same normal clips it did NOT fire on (base rate), and windows around the
 *labelled* event of near-miss clips (positive control). Clips are cut from the source videos with ffmpeg

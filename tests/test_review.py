@@ -8,9 +8,12 @@ import numpy as np
 import pytest
 
 from sotif_miner.eval.review import (
+    audit,
+    audit_decision,
     build_review,
     cohen_kappa,
     collect_items,
+    corrected_prevalence,
     fisher_greater,
     judge_review,
     score_review,
@@ -112,3 +115,53 @@ def test_statistics():
     assert abs(fisher_greater(8, 10, 2, 10) - 0.01151) < 1e-4           # hypergeometric tail
     assert cohen_kappa(list("aabb"), list("aabb")) == 1.0
     assert abs(cohen_kappa(list("aabb"), list("abab"))) < 1e-9
+
+
+def test_audit_end_to_end_flags_an_unreliable_judge(tmp_path):
+    """A judge that calls everything a close call 'recognises' every near-miss but also every normal clip:
+    the audit must refuse to use its verdicts instead of reporting 100 % unlabelled close calls."""
+    from sotif_miner.vlm.scripted import ScriptedBackend
+
+    run = _run(tmp_path)
+    backend = ScriptedBackend(lambda prompt, schema, n: json.dumps(
+        {"verdict": "close_call", "reason": "car ahead", "causes": ["adjacent_lane"], "confidence": 0.9}))
+    r = audit(run, backend, n_near_miss=4, n_unflagged=4, n_frames=4)
+    assert r["judge_sensitivity"]["share"] == 1.0 and r["judge_false_close_call_rate"]["share"] == 1.0
+    assert r["judge_reliable"] is False and "NOT reliable" in r["decision"]
+    assert r["flagged_close_call_corrected"] is None
+    assert (run / "false_alarm_audit.json").exists()
+    rows = list(csv.DictReader((run / "review_judge.csv").open()))
+    assert rows and all(row["causes"] == "adjacent_lane" for row in rows)
+    other = ScriptedBackend(lambda prompt, schema, n: json.dumps(
+        {"verdict": "normal", "reason": "x", "causes": [], "confidence": 0.5}))
+    other.name = "bigger"
+    audit(run, other, n_near_miss=4, n_unflagged=4, n_frames=4)        # new judge: re-judged, clips reused
+    rows = list(csv.DictReader((run / "review_judge.csv").open()))
+    assert {row["reviewer"] for row in rows} == {"vlm:bigger"} and len(rows) == 14
+
+
+def _rater(sens_k, n_near, fp_k, n_unfl, fl_k, n_fl, lane_k):
+    def arm(k, n, extra=None):
+        v = {x: {"k": 0, "share": 0.0, "ci95": [0.0, 0.0]} for x in ("close_call", "hard_brake", "normal", "cant_tell")}
+        p, lo, hi = wilson(k, n)
+        v["close_call"] = {"k": k, "share": p, "ci95": [lo, hi]}
+        v["normal"] = {"k": n - k, "share": 1 - p, "ci95": [0.0, 1.0]}
+        return {"n": n, "verdicts": v, "causes_of_non_conflicts": extra or {}}
+    return {"arms": {"near_miss": arm(sens_k, n_near), "unflagged_normal": arm(fp_k, n_unfl),
+                     "flagged_normal": arm(fl_k, n_fl, {"adjacent_lane": lane_k})},
+            "flagged_vs_unflagged_close_call": {"difference": 0.0, "fisher_p_one_sided": 1.0}}
+
+
+def test_audit_decision_reliable_paths():
+    lane = audit_decision(_rater(45, 50, 3, 50, 40, 160, 60))          # 60 of 120 non-conflicts: adjacent lane
+    assert lane["judge_reliable"] and "build lane" in lane["decision"]
+    assert abs(lane["flagged_close_call_corrected"] - corrected_prevalence(0.25, 0.9, 0.06)) < 1e-9
+    no_lane = audit_decision(_rater(45, 50, 3, 50, 40, 160, 10))
+    assert no_lane["judge_reliable"] and "skip lane" in no_lane["decision"]
+    weak = audit_decision(_rater(20, 50, 3, 50, 40, 160, 10))         # recognises only 40 % of near-misses
+    assert not weak["judge_reliable"]
+
+
+def test_corrected_prevalence():
+    assert abs(corrected_prevalence(0.25, 0.9, 0.06) - (0.25 - 0.06) / 0.84) < 1e-12
+    assert corrected_prevalence(0.05, 0.9, 0.1) == 0.0

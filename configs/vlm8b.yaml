@@ -1,0 +1,4 @@
+# Larger local judge/diagnosis model (slower on 6 GB: partly runs from system RAM).
+# One-time: ollama pull qwen3-vl:8b-instruct
+vlm:
+  ollama: {model: "qwen3-vl:8b-instruct"}

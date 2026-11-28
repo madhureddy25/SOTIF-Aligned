@@ -718,6 +718,39 @@ def confound_cmd(run: Path = typer.Option(..., help="Nexar run folder (train spl
         out_json.write_text(json.dumps({"counts": counts, "rows": rows}, indent=2))
 
 
+@app.command("audit-false-alarms")
+def audit_false_alarms(run: Path = typer.Option(..., help="Rescored held-out run (clips/*.json + source videos)"),
+                       config: Path | None = typer.Option(None, help="Override YAML (vlm backend/model)"),
+                       near_miss: int = typer.Option(50, help="Labelled near-miss windows (judge sensitivity)"),
+                       unflagged: int = typer.Option(50, help="Unflagged normal windows (base rate)"),
+                       frames: int = typer.Option(10, help="Frames per clip for the judge"),
+                       rebuild: bool = typer.Option(False, help="Re-cut clips and restart the judge from scratch")):
+    """Step 1, fully automatic: are the false alarms real close calls? Cut clips, blind VLM judge, score, decide."""
+    from .eval.review import audit
+    from .vlm.factory import build_backend
+
+    def prog(n, t):
+        if n % 25 == 0 or n == t:
+            typer.echo(f"  {n}/{t}")
+
+    r = audit(run, build_backend(load_config(config)), near_miss, unflagged, n_frames=frames, rebuild=rebuild,
+              progress=prog)
+    sens, fpr, fl = r["judge_sensitivity"], r["judge_false_close_call_rate"], r["flagged_close_call_observed"]
+    typer.echo("items: " + ", ".join(f"{k} {v}" for k, v in r["items"].items()) + f"   judge: {r['judge']}")
+    typer.echo(f"judge on labelled near-misses (sensitivity): {sens['share']:.2f} "
+               f"[{sens['ci95'][0]:.2f}, {sens['ci95'][1]:.2f}]")
+    typer.echo(f"judge 'close call' on unflagged normal (base rate / false positives): {fpr['share']:.2f} "
+               f"[{fpr['ci95'][0]:.2f}, {fpr['ci95'][1]:.2f}]")
+    typer.echo(f"flagged false alarms judged close calls: {fl['share']:.2f} [{fl['ci95'][0]:.2f}, {fl['ci95'][1]:.2f}]"
+               + (f"  -> corrected for judge error: {r['flagged_close_call_corrected']:.2f}"
+                  if r["flagged_close_call_corrected"] is not None else ""))
+    b = r["model_beats_base_rate"]
+    typer.echo(f"flagged vs unflagged: {b['difference']:+.2f} (one-sided Fisher p={b['fisher_p_one_sided']:.4f})")
+    typer.echo(f"top causes of flagged non-conflicts: {r['top_causes']}")
+    typer.echo(f"\nDECISION: {r['decision']}")
+    typer.echo(f"Full result: {(run / 'false_alarm_audit.json').resolve()}")
+
+
 @app.command("review-sheet")
 def review_sheet(run: Path = typer.Option(..., help="Rescored run (clips/*.json with windows + source videos)"),
                  near_miss: int = typer.Option(50, help="Near-miss controls (labelled event windows of positives)"),

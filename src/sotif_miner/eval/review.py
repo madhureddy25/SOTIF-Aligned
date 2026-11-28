@@ -162,6 +162,9 @@ class Judgement(BaseModel):
     verdict: Literal["close_call", "hard_brake", "normal", "cant_tell"]
     other_road_user: str = Field(default="", description="the road user involved, if any")
     reason: str = Field(description="one sentence: what is visible that supports the verdict")
+    causes: list[Literal["adjacent_lane", "lead_braking", "stopped_traffic", "turning_vehicle", "cut_in",
+                         "pedestrian_cyclist", "parked_vehicle", "glare_night_weather", "camera_artifact",
+                         "other"]] = Field(default_factory=list, description="what made the scene look risky")
     confidence: float = Field(ge=0.0, le=1.0)
 
 
@@ -175,6 +178,9 @@ Decide what happens to the camera car:
 - hard_brake: the camera car brakes or stops sharply, but no other road user is in conflict with it;
 - normal: ordinary driving, including routine stops and slow traffic;
 - cant_tell: the frames do not show enough to decide.
+In "causes", list what in the scene could make it look risky (empty if nothing): adjacent_lane (traffic in a
+neighbouring lane), lead_braking, stopped_traffic, turning_vehicle, cut_in, pedestrian_cyclist, parked_vehicle,
+glare_night_weather, camera_artifact, other.
 Reply with JSON only."""
 
 
@@ -221,7 +227,8 @@ def judge_review(run: Path, backend, n_frames: int = 10, out_csv: Path | None = 
             prompt = JUDGE_PROMPT.format(n=len(frames), dt=dur / max(1, len(frames) - 1), dur=dur)
             try:
                 j = backend.generate(frames, prompt, Judgement, system=JUDGE_SYSTEM)
-                w.writerow([item, j.verdict, "", j.reason, f"vlm:{backend.name}", f"{j.confidence:.2f}"])
+                w.writerow([item, j.verdict, ";".join(j.causes), j.reason, f"vlm:{backend.name}",
+                            f"{j.confidence:.2f}"])
             except Exception as e:  # noqa: BLE001 - one bad item must not stop the run
                 w.writerow([item, "cant_tell", "", f"judge error: {e}", f"vlm:{backend.name}", 0.0])
             fh.flush()
@@ -358,3 +365,64 @@ function exportCsv(){const rows=[["item","verdict","causes","note","reviewer"]];
  l.href=u;l.download="review_answers"+(who?"_"+who.replace(/\\W+/g,"_"):"")+".csv";l.click();URL.revokeObjectURL(u)}
 rate(1); render();
 </script></body></html>"""
+
+
+# ----------------------------------------------------------------------------------------------- automatic audit
+
+def corrected_prevalence(p_obs: float, sens: float, fpr: float) -> float:
+    """Rogan-Gladen: true share of close calls given the judge's sensitivity and false-positive rate."""
+    if not (sens - fpr) > 0:
+        return float("nan")
+    return min(1.0, max(0.0, (p_obs - fpr) / (sens - fpr)))
+
+
+def audit_decision(rater: dict, min_sensitivity: float = 0.7, lane_share: float = 0.3) -> dict:
+    """Turn one rater's scores into the pre-set decisions: is the judge reliable, how many false alarms are real
+    close calls (corrected for the judge's errors), and should lane-relative cues be built (Step 2)?"""
+    arms = rater["arms"]
+    sens = arms["near_miss"]["verdicts"]["close_call"]
+    fpr = arms["unflagged_normal"]["verdicts"]["close_call"]
+    flagged = arms["flagged_normal"]["verdicts"]["close_call"]
+    # Reliable = recognises labelled near-misses (>= min_sensitivity, CI clear of a coin flip) AND calls them
+    # close calls clearly more often than random normal driving (CIs do not overlap). A judge that says
+    # "close call" to everything, or to nothing, fails.
+    reliable = (arms["near_miss"]["n"] > 0 and sens["share"] >= min_sensitivity and sens["ci95"][0] > 0.5
+                and sens["ci95"][0] > fpr["ci95"][1])
+    non = {v: arms["flagged_normal"]["verdicts"][v]["k"] for v in ("normal", "hard_brake")}
+    n_non = sum(non.values())
+    causes = arms["flagged_normal"]["causes_of_non_conflicts"]
+    lane = causes.get("adjacent_lane", 0) / n_non if n_non else float("nan")
+    out = {"judge_sensitivity": sens, "judge_false_close_call_rate": fpr, "judge_reliable": bool(reliable),
+           "flagged_close_call_observed": flagged,
+           "flagged_close_call_corrected": corrected_prevalence(flagged["share"], sens["share"], fpr["share"])
+           if reliable else None,
+           "model_beats_base_rate": rater["flagged_vs_unflagged_close_call"],
+           "adjacent_lane_share_of_non_conflicts": lane,
+           "top_causes": sorted(((c, k) for c, k in causes.items() if k), key=lambda x: -x[1])[:5]}
+    if not reliable:
+        out["decision"] = ("judge NOT reliable on labelled near-misses: verdicts on false alarms are not usable "
+                           "(retry with a larger model, e.g. --config configs\\vlm8b.yaml)")
+    else:
+        out["decision"] = ("build lane-relative cues (corridor fix first)" if lane >= lane_share else
+                           f"skip lane cues: adjacent lane drives {lane:.0%} of non-conflicts (< {lane_share:.0%})")
+    return out
+
+
+def audit(run: Path, backend, n_near_miss: int = 50, n_unflagged: int = 50, seed: int = 0, n_frames: int = 10,
+          rebuild: bool = False, progress=None) -> dict:
+    """Fully automatic false-alarm audit: cut clips (once), blind VLM judge (resumable), score, decide."""
+    if rebuild or not (run / "review_key.json").exists():
+        build_review(run, n_near_miss, n_unflagged, seed, progress=progress)
+        (run / "review_judge.csv").unlink(missing_ok=True)
+    prev = run / "review_judge.csv"
+    if prev.exists():  # a different judge model (e.g. the 8B retry) restarts the judging, not the clip cutting
+        names = {r.get("reviewer") for r in csv.DictReader(prev.open(encoding="utf-8"))}
+        if names - {f"vlm:{getattr(backend, 'name', 'vlm')}"}:
+            prev.unlink()
+    judge_csv = judge_review(run, backend, n_frames, progress=progress)
+    scores = score_review([judge_csv], run / "review_key.json")
+    rater = next(iter(scores["raters"].values()))
+    result = {"items": scores["items"], "judge": getattr(backend, "name", "vlm"), "scores": rater,
+              **audit_decision(rater)}
+    (run / "false_alarm_audit.json").write_text(json.dumps(result, indent=2, default=float))
+    return result
